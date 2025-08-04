@@ -1,16 +1,16 @@
 # DIM Plugins (Python)
 
-[![License](https://img.shields.io/github/license/dimchat/sdk-py)](https://github.com/dimchat/sdk-py/blob/master/LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/dimchat/sdk-py/pulls)
-[![Platform](https://img.shields.io/badge/Platform-Python%203-brightgreen.svg)](https://github.com/dimchat/sdk-py/wiki)
-[![Issues](https://img.shields.io/github/issues/dimchat/sdk-py)](https://github.com/dimchat/sdk-py/issues)
-[![Repo Size](https://img.shields.io/github/repo-size/dimchat/sdk-py)](https://github.com/dimchat/sdk-py/archive/refs/heads/main.zip)
-[![Tags](https://img.shields.io/github/tag/dimchat/sdk-py)](https://github.com/dimchat/sdk-py/tags)
+[![License](https://img.shields.io/github/license/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/blob/master/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/dimchat/plugins-py/pulls)
+[![Platform](https://img.shields.io/badge/Platform-Python%203-brightgreen.svg)](https://github.com/dimchat/plugins-py/wiki)
+[![Issues](https://img.shields.io/github/issues/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/issues)
+[![Repo Size](https://img.shields.io/github/repo-size/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/archive/refs/heads/main.zip)
+[![Tags](https://img.shields.io/github/tag/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/tags)
 [![Version](https://img.shields.io/pypi/v/dimplugins)](https://pypi.org/project/dimplugins)
 
-[![Watchers](https://img.shields.io/github/watchers/dimchat/sdk-py)](https://github.com/dimchat/sdk-py/watchers)
-[![Forks](https://img.shields.io/github/forks/dimchat/sdk-py)](https://github.com/dimchat/sdk-py/forks)
-[![Stars](https://img.shields.io/github/stars/dimchat/sdk-py)](https://github.com/dimchat/sdk-py/stargazers)
+[![Watchers](https://img.shields.io/github/watchers/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/watchers)
+[![Forks](https://img.shields.io/github/forks/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/forks)
+[![Stars](https://img.shields.io/github/stars/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/stargazers)
 [![Followers](https://img.shields.io/github/followers/dimchat)](https://github.com/orgs/dimchat/followers)
 
 ## Plugins
@@ -120,9 +120,6 @@ from dimplugins import BaseMetaFactory
 
 
 class CompatibleMetaFactory(BaseMetaFactory):
-
-    def __init__(self, version: str):
-        super().__init__(version=version)
 
     # Override
     def parse_meta(self, meta: dict) -> Optional[Meta]:
