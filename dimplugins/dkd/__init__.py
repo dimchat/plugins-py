@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
+#
+#   DIMP : Decentralized Instant Messaging Protocol
+#
+#                                Written in 2019 by Moky <albert.moky@gmail.com>
+#
 # ==============================================================================
 # MIT License
 #
-# Copyright (c) 2020 Albert Moky
+# Copyright (c) 2019 Albert Moky
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,44 +28,19 @@
 # SOFTWARE.
 # ==============================================================================
 
-"""
-    Message Digest
-    ~~~~~~~~~~~~~~
+from .cmd_fact import GeneralCommandFactory
+from .cmd_fact import HistoryCommandFactory
+from .cmd_fact import GroupCommandFactory
 
-    SHA-256, Keccak256, RipeMD-160, ...
-"""
-
-import hashlib
-
-from Crypto.Hash import keccak
-
-from dimp import MessageDigester
+from .factory import MessageFactory
 
 
-class SHA256Digester(MessageDigester):
+__all__ = [
 
-    # Override
-    def digest(self, data: bytes) -> bytes:
-        """ SHA-256 """
-        hash_obj = hashlib.sha256(data)
-        return hash_obj.digest()
+    'GeneralCommandFactory',
+    'HistoryCommandFactory',
+    'GroupCommandFactory',
 
+    'MessageFactory',
 
-class KECCAK256Digester(MessageDigester):
-
-    # Override
-    def digest(self, data: bytes) -> bytes:
-        """ Keccak256 digest """
-        hash_obj = keccak.new(digest_bits=256)
-        hash_obj.update(data)
-        return hash_obj.digest()
-
-
-class RIPEMD160Digester(MessageDigester):
-
-    # Override
-    def digest(self, data: bytes) -> bytes:
-        """ RipeMD-160 """
-        hash_obj = hashlib.new('ripemd160')
-        hash_obj.update(data)
-        return hash_obj.digest()
+]

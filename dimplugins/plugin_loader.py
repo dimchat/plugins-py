@@ -33,34 +33,17 @@ from .mkm import *
 # noinspection PyMethodMayBeStatic
 class PluginLoader:
 
-    def __init__(self):
-        super().__init__()
-        self.__loaded = False
-
-    def run(self):
-        if self.__loaded:
-            # no need to load it again
-            return
-        else:
-            # mark it to loaded
-            self.__loaded = True
-        # try to load all plugins
-        self._load()
-
-    def _load(self):
+    def load(self):
         """ Register plugins """
-        self._register_data_coders()
-        self._register_data_digesters()
+        self._register_coders()
+        self._register_digesters()
 
         self._register_symmetric_key_factories()
         self._register_asymmetric_key_factories()
 
-        self._register_id_factory()
-        self._register_address_factory()
-        self._register_meta_factories()
-        self._register_document_factories()
+        self._register_entity_factories()
 
-    def _register_data_coders(self):
+    def _register_coders(self):
         """ Data coders """
         self._register_base58_coder()
         self._register_base64_coder()
@@ -104,21 +87,11 @@ class PluginLoader:
         # TransportableData.register(algorithm=EncodeAlgorithms.DEFAULT, factory=factory)
         TransportableData.set_factory(algorithm='*', factory=factory)
 
-    def _register_data_digesters(self):
+    def _register_digesters(self):
         """ Data digesters """
-        self._register_md5_digester()
-        self._register_sha1_digester()
         self._register_sha256_digester()
         self._register_keccak256_digester()
         self._register_ripemd160_digester()
-
-    def _register_md5_digester(self):
-        # MD5
-        MD5.digester = MD5Digester()
-
-    def _register_sha1_digester(self):
-        # SHA1
-        SHA1.digester = SHA1Digester()
 
     def _register_sha256_digester(self):
         # SHA256
@@ -126,11 +99,11 @@ class PluginLoader:
 
     def _register_keccak256_digester(self):
         # KECCAK256
-        KECCAK256.digester = Keccak256Digester()
+        KECCAK256.digester = KECCAK256Digester()
 
     def _register_ripemd160_digester(self):
         # RIPEMD160
-        RIPEMD160.digester = RipeMD160Digester()
+        RIPEMD160.digester = RIPEMD160Digester()
 
     def _register_symmetric_key_factories(self):
         """ Symmetric key parsers """
@@ -176,16 +149,20 @@ class PluginLoader:
         PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pri)
         PrivateKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pri)
 
+    def _register_entity_factories(self):
+        """ ID, Address, Meta, Document parsers """
+        self._register_id_factory()
+        self._register_address_factory()
+        self._register_meta_factories()
+        self._register_document_factories()
+
     def _register_id_factory(self):
-        """ ID factory """
         ID.set_factory(factory=GeneralIdentifierFactory())
 
     def _register_address_factory(self):
-        """ Address factory """
         Address.set_factory(factory=BaseAddressFactory())
 
     def _register_meta_factories(self):
-        """ Meta factories """
         self._set_meta_factory(version=MetaType.MKM, alias='mkm')
         self._set_meta_factory(version=MetaType.BTC, alias='btc')
         self._set_meta_factory(version=MetaType.ETH, alias='eth')
@@ -197,7 +174,6 @@ class PluginLoader:
         Meta.set_factory(version=alias, factory=factory)
 
     def _register_document_factories(self):
-        """ Document factories """
         self._set_document_factory(doc_type='*')
         self._set_document_factory(doc_type=DocumentType.VISA)
         self._set_document_factory(doc_type=DocumentType.PROFILE)

@@ -1,6 +1,6 @@
 # DIM Plugins (Python)
 
-[![License](https://img.shields.io/github/license/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/dimchat/plugins-py/pulls)
 [![Platform](https://img.shields.io/badge/Platform-Python%203-brightgreen.svg)](https://github.com/dimchat/plugins-py/wiki)
 [![Issues](https://img.shields.io/github/issues/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/issues)
@@ -52,8 +52,8 @@
 ```python
 from typing import Optional
 
-from dimsdk import ConstantString
-from dimsdk import Address, ANYWHERE, EVERYWHERE
+from dimp import ConstantString
+from dimp import Address, ANYWHERE, EVERYWHERE
 from dimplugins import BTCAddress, ETHAddress
 from dimplugins import BaseAddressFactory
 
@@ -111,10 +111,10 @@ class UnknownAddress(ConstantString, Address):
 ```python
 from typing import Optional
 
-from dimsdk import VerifyKey
-from dimsdk import TransportableData
-from dimsdk import Meta
-from dimsdk.plugins import SharedAccountExtensions
+from dimp import VerifyKey
+from dimp import TransportableData
+from dimp import Meta
+from dimp.plugins import SharedAccountExtensions
 from dimplugins import DefaultMeta, BTCMeta, ETHMeta
 from dimplugins import BaseMetaFactory
 
@@ -143,7 +143,7 @@ class CompatibleMetaFactory(BaseMetaFactory):
 ### Plugin Loader
 
 ```python
-from dimsdk import Address, Meta
+from dimp import Address, Meta
 from dimplugins import PluginLoader
 
 from .address import CompatibleAddressFactory
@@ -172,14 +172,40 @@ class CompatiblePluginLoader(PluginLoader):
         Meta.set_factory(version='ETH', factory=eth)
 ```
 
+### ExtensionLoader
+
+```python
+from dimp import ContentType
+from dimp.plugins import ExtensionLoader
+
+from ..protocol import HandshakeCommand, BaseHandshakeCommand
+from ..protocol import AppCustomizedContent
+
+
+class CommonExtensionLoader(ExtensionLoader):
+
+    # Override
+    def _register_customized_factories(self):
+        # Application Customized
+        self._set_content_factory(msg_type=ContentType.APPLICATION, content_class=AppCustomizedContent)
+        self._set_content_factory(msg_type=ContentType.CUSTOMIZED, content_class=AppCustomizedContent)
+
+    # Override
+    def _register_command_factories(self):
+        super()._register_command_factories()
+        # Handshake
+        self._set_command_factory(cmd=HandshakeCommand.HANDSHAKE, command_class=BaseHandshakeCommand)
+```
+
 ## Usage
 
 You must load all plugins before your business run:
 
 ```python
-from dimsdk.plugins import ExtensionLoader
+from dimplugins import ExtensionLoader
 from dimplugins import PluginLoader
 
+from .compat_loader import CommonExtensionLoader
 from .compat_loader import CompatiblePluginLoader
 
 
@@ -187,12 +213,24 @@ class LibraryLoader:
 
     def __init__(self, extensions: ExtensionLoader = None, plugins: PluginLoader = None):
         super().__init__()
-        self.__extensions = ExtensionLoader() if extensions is None else extensions
+        self.__extensions = CommonExtensionLoader() if extensions is None else extensions
         self.__plugins = CompatiblePluginLoader() if plugins is None else plugins
+        self.__loaded = False
 
     def run(self):
-        self.__extensions.run()
-        self.__plugins.run()
+        if self.__loaded:
+            # no need to load it again
+            return
+        else:
+            # mark it to loaded
+            self.__loaded = True
+        # try to load all plugins
+        self.load()
+        
+    # protected
+    def load(self):
+        self.__extensions.load()
+        self.__plugins.load()
 
 
 if __name__ == '__main__':

@@ -23,9 +23,6 @@
 # SOFTWARE.
 # ==============================================================================
 
-from .digest import MD5Digester, SHA1Digester, SHA256Digester
-from .digest import Keccak256Digester, RipeMD160Digester
-
 from .plain import PlainKey, PlainKeyFactory
 from .aes import AESKey, AESKeyFactory
 
@@ -35,11 +32,10 @@ from .rsa import RSAPrivateKey, RSAPrivateKeyFactory
 from .ecc import ECCPublicKey, ECCPublicKeyFactory
 from .ecc import ECCPrivateKey, ECCPrivateKeyFactory
 
+from .digest import SHA256Digester, KECCAK256Digester, RIPEMD160Digester
+
 
 __all__ = [
-
-    'MD5Digester', 'SHA1Digester', 'SHA256Digester',
-    'Keccak256Digester', 'RipeMD160Digester',
 
     'PlainKey', 'PlainKeyFactory',
     'AESKey', 'AESKeyFactory',
@@ -49,5 +45,11 @@ __all__ = [
 
     'ECCPublicKey', 'ECCPublicKeyFactory',
     'ECCPrivateKey', 'ECCPrivateKeyFactory',
+
+    #
+    #   Message Digester
+    #
+
+    'SHA256Digester', 'KECCAK256Digester', 'RIPEMD160Digester',
 
 ]

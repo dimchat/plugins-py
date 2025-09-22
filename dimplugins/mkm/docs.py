@@ -35,7 +35,8 @@ from dimp import ID
 from dimp import DocumentType
 from dimp import Document, DocumentFactory
 from dimp import BaseDocument, BaseVisa, BaseBulletin
-from dimp.plugins import SharedAccountExtensions
+
+from dimp.ext import SharedAccountExtensions
 
 
 class GeneralDocumentFactory(DocumentFactory):

@@ -37,7 +37,8 @@ from dimp import EntityType, Address
 from dimp import MetaType
 from dimp import Meta, MetaFactory
 from dimp import BaseMeta
-from dimp.plugins import SharedAccountExtensions
+
+from dimp.ext import SharedAccountExtensions
 
 from .btc import BTCAddress
 from .eth import ETHAddress

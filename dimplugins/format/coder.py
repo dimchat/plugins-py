@@ -30,10 +30,10 @@
     Base58
 """
 
-import base64
-import json
 from typing import Optional, Any
 
+import json
+import base64
 import base58
 
 from dimp import DataCoder, ObjectCoder, StringCoder
