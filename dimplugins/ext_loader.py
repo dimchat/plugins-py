@@ -200,10 +200,6 @@ class ExtensionLoader:
         # 'query' is deprecated
         # self._set_command_factory(cmd=GroupCommand.QUERY, command_class=QueryGroupCommand)
         self._set_command_factory(cmd=GroupCommand.RESET, command_class=ResetGroupCommand)
-        # Group Admin Commands
-        self._set_command_factory(cmd=GroupCommand.HIRE, command_class=HireGroupCommand)
-        self._set_command_factory(cmd=GroupCommand.FIRE, command_class=FireGroupCommand)
-        self._set_command_factory(cmd=GroupCommand.RESIGN, command_class=ResignGroupCommand)
 
     def _set_command_factory(self, cmd: str,
                              command_class=None, factory: CommandFactory = None):

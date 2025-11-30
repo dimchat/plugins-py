@@ -58,7 +58,7 @@ __all__ = [
     # 'FormatExtensions',
     'GeneralFormatHelper', 'SharedFormatExtensions',
 
-    'AddressHelper', 'IdentifierHelper',
+    'AddressHelper', 'IDHelper',
     'MetaHelper', 'DocumentHelper',
     # 'AccountExtensions',
     'GeneralAccountHelper', 'SharedAccountExtensions',

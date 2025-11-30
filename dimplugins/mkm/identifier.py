@@ -43,14 +43,14 @@ class GeneralIdentifierFactory(IDFactory):
         self._identifiers = {}  # str -> ID
 
     # Override
-    def generate_identifier(self, meta: Meta, network: int, terminal: Optional[str]) -> ID:
+    def generate_id(self, meta: Meta, network: int, terminal: Optional[str]) -> ID:
         address = Address.generate(meta=meta, network=network)
         assert address is not None, 'failed to generate ID with meta: %s' % meta
         return ID.create(address=address, name=meta.seed, terminal=terminal)
 
     # Override
-    def create_identifier(self, name: Optional[str], address: Address, terminal: Optional[str]) -> ID:
-        identifier = Identifier.concat(address=address, name=name, terminal=terminal)
+    def create_id(self, name: Optional[str], address: Address, terminal: Optional[str]) -> ID:
+        identifier = Identifier.concat(name=name, address=address, terminal=terminal)
         did = self._identifiers.get(identifier)
         if did is None:
             did = self._new_id(identifier=identifier, name=name, address=address, terminal=terminal)
@@ -58,7 +58,7 @@ class GeneralIdentifierFactory(IDFactory):
         return did
 
     # Override
-    def parse_identifier(self, identifier: str) -> Optional[ID]:
+    def parse_id(self, identifier: str) -> Optional[ID]:
         did = self._identifiers.get(identifier)
         if did is None:
             did = self._parse(identifier=identifier)

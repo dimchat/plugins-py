@@ -40,13 +40,13 @@ from dimp import Meta, MetaFactory
 from dimp import Document, DocumentFactory
 from dimp import DocumentType
 
-from dimp.ext import AddressHelper, IdentifierHelper
+from dimp.ext import AddressHelper, IDHelper
 from dimp.ext import MetaHelper, DocumentHelper
 from dimp.ext import GeneralAccountHelper
 
 
 class AccountGeneralFactory(GeneralAccountHelper,
-                            AddressHelper, IdentifierHelper,
+                            AddressHelper, IDHelper,
                             MetaHelper, DocumentHelper):
     """ Account GeneralFactory """
 
@@ -102,7 +102,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
     def generate_address(self, meta: Meta, network: int = None) -> Address:
         factory = self.get_address_factory()
         assert factory is not None, 'address factory not set'
-        return factory.generate_address(meta=meta, network=network)
+        return factory.generate_address(meta, network)
 
     # Override
     def parse_address(self, address: Any) -> Optional[Address]:
@@ -123,27 +123,27 @@ class AccountGeneralFactory(GeneralAccountHelper,
     #
 
     # Override
-    def set_identifier_factory(self, factory: IDFactory):
+    def set_id_factory(self, factory: IDFactory):
         self.__id_factory = factory
 
     # Override
-    def get_identifier_factory(self) -> Optional[IDFactory]:
+    def get_id_factory(self) -> Optional[IDFactory]:
         return self.__id_factory
 
     # Override
-    def generate_identifier(self, meta: Meta, network: Optional[int], terminal: Optional[str]) -> ID:
-        factory = self.get_identifier_factory()
+    def generate_id(self, meta: Meta, network: Optional[int], terminal: Optional[str]) -> ID:
+        factory = self.get_id_factory()
         assert factory is not None, 'ID factory not set'
-        return factory.generate_identifier(meta=meta, network=network, terminal=terminal)
+        return factory.generate_id(meta, network, terminal=terminal)
 
     # Override
-    def create_identifier(self, name: Optional[str], address: Address, terminal: Optional[str]) -> ID:
-        factory = self.get_identifier_factory()
+    def create_id(self, name: Optional[str], address: Address, terminal: Optional[str]) -> ID:
+        factory = self.get_id_factory()
         assert factory is not None, 'ID factory not set'
-        return factory.create_identifier(name=name, address=address, terminal=terminal)
+        return factory.create_id(name=name, address=address, terminal=terminal)
 
     # Override
-    def parse_identifier(self, identifier: Any) -> Optional[ID]:
+    def parse_id(self, identifier: Any) -> Optional[ID]:
         if identifier is None:
             return None
         elif isinstance(identifier, ID):
@@ -152,9 +152,9 @@ class AccountGeneralFactory(GeneralAccountHelper,
         if string is None:
             # assert False, 'ID error: %s' % identifier
             return None
-        factory = self.get_identifier_factory()
+        factory = self.get_id_factory()
         assert factory is not None, 'ID factory not set'
-        return factory.parse_identifier(identifier=string)
+        return factory.parse_id(string)
 
     #
     #   Meta
@@ -220,7 +220,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
                         data: Optional[str], signature: Optional[TransportableData]) -> Document:
         factory = self.get_document_factory(doc_type)
         assert factory is not None, 'document factory not found for type: %s' % doc_type
-        return factory.create_document(identifier=identifier, data=data, signature=signature)
+        return factory.create_document(identifier, data=data, signature=signature)
 
     # Override
     def parse_document(self, document: Any) -> Optional[Document]:
