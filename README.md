@@ -52,10 +52,8 @@
 ```python
 from typing import Optional
 
-from dimp import ConstantString
-from dimp import Address, ANYWHERE, EVERYWHERE
-from dimplugins import BTCAddress, ETHAddress
-from dimplugins import BaseAddressFactory
+from dimp import *
+from dimplugins import *
 
 
 class CompatibleAddressFactory(BaseAddressFactory):
@@ -111,12 +109,8 @@ class UnknownAddress(ConstantString, Address):
 ```python
 from typing import Optional
 
-from dimp import VerifyKey
-from dimp import TransportableData
-from dimp import Meta
-from dimp.plugins import SharedAccountExtensions
-from dimplugins import DefaultMeta, BTCMeta, ETHMeta
-from dimplugins import BaseMetaFactory
+from dimp import *
+from dimplugins import *
 
 
 class CompatibleMetaFactory(BaseMetaFactory):
@@ -243,5 +237,5 @@ You must ensure that every ```Address``` you extend has a ```Meta``` type that c
 
 ----
 
-Copyright &copy; 2018-2025 Albert Moky
+Copyright &copy; 2018-2026 Albert Moky
 [![Followers](https://img.shields.io/github/followers/moky)](https://github.com/moky?tab=followers)

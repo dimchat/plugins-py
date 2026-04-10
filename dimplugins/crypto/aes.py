@@ -29,9 +29,11 @@ from typing import Optional, Dict
 from Crypto.Cipher import AES
 
 from dimp import SymmetricAlgorithms
-from dimp import TransportableData
 from dimp import SymmetricKey, SymmetricKeyFactory
-from dimp import BaseSymmetricKey
+from dimp import TransportableData
+from dimp import Base64Data
+
+from .keys import BaseSymmetricKey
 
 
 def random_bytes(size: int) -> bytes:
@@ -51,23 +53,22 @@ class AESKey(BaseSymmetricKey):
         #   1. check mode = 'CBC'
         #   2. check padding = 'PKCS7Padding'
         #
-        # check key data
-        base64 = self.get('data')
-        if base64 is None:
-            # new key
-            self.__data = self._generate()
-        else:
-            # lazy load
-            self.__data: Optional[TransportableData] = None
+        # lazy load
+        self.__data: Optional[TransportableData] = None
 
-    def _generate(self) -> TransportableData:
-        # random key data
-        pwd = random_bytes(size=self.size)
-        ted = TransportableData.create(data=pwd)
-        self['data'] = ted.object  # base64_encode()
-        # self['mode'] = 'CBC'
-        # self['padding'] = 'PKCS7'
-        return ted
+    @classmethod
+    def new_key(cls, size: int = 32) -> SymmetricKey:
+        """ generate a new random key """
+        pwd = random_bytes(size=size)
+        ted = Base64Data.create(binary=pwd)
+        key = AESKey(key={
+            'algorithm': SymmetricAlgorithms.AES,
+            'data': ted.serialize(),
+            # 'mod': 'CBC',
+            # 'padding': 'PKCS7',
+        })
+        key.__data = ted
+        return key
 
     @property
     def size(self) -> int:
@@ -96,14 +97,15 @@ class AESKey(BaseSymmetricKey):
             return count
 
     @property  # Override
-    def data(self) -> bytes:
+    def data(self) -> TransportableData:
         ted = self.__data
         if ted is None:
             base64 = self.get('data')
             assert base64 is not None, 'key data not found: %s' % self
-            self.__data = ted = TransportableData.parse(base64)
+            ted = TransportableData.parse(base64)
             assert ted is not None, 'key data error: %s' % base64
-        return ted.data
+            self.__data = ted
+        return ted
 
     def _get_init_vector(self, params: Optional[Dict]) -> Optional[bytes]:
         """ get IV from params """
@@ -139,36 +141,38 @@ class AESKey(BaseSymmetricKey):
         if extra is None:
             assert False, 'extra dict must provided to store IV for AES'
         else:
-            ted = TransportableData.create(data=iv)
+            ted = Base64Data.create(binary=iv)
             extra['IV'] = ted.object
         # OK
         return iv
 
     # Override
-    def encrypt(self, data: bytes, extra: Optional[Dict] = None) -> bytes:
+    def encrypt(self, plaintext: bytes, extra: Optional[Dict] = None) -> bytes:
         # 1. if 'IV' not found in extra params, new a random 'IV'
         key_iv = self._get_init_vector(params=extra)
         if key_iv is None:
             key_iv = self._new_init_vector(extra=extra)
         # 2. get key data
         key_data = self.data
+        buffer = key_data.binary
         # 3. try to encrypt
-        data = pkcs7_pad(data=data, block_size=AES.block_size)
-        key = AES.new(key_data, AES.MODE_CBC, key_iv)
+        data = pkcs7_pad(data=plaintext, block_size=AES.block_size)
+        key = AES.new(buffer, AES.MODE_CBC, key_iv)
         return key.encrypt(data)
 
     # Override
-    def decrypt(self, data: bytes, params: Optional[Dict] = None) -> Optional[bytes]:
+    def decrypt(self, ciphertext: bytes, params: Optional[Dict] = None) -> Optional[bytes]:
         # 1. if 'IV' not found in extra params, use an empty 'IV'
         key_iv = self._get_init_vector(params=params)
         if key_iv is None:
             key_iv = self._zero_init_vector()
         # 2. get key data
         key_data = self.data
+        buffer = key_data.binary
         # 3. try to decrypt
         try:
-            key = AES.new(key_data, AES.MODE_CBC, key_iv)
-            plaintext = key.decrypt(data)
+            key = AES.new(buffer, AES.MODE_CBC, key_iv)
+            plaintext = key.decrypt(ciphertext)
             return pkcs7_unpad(data=plaintext)
         except ValueError:
             return None
@@ -200,8 +204,7 @@ class AESKeyFactory(SymmetricKeyFactory):
 
     # Override
     def generate_symmetric_key(self) -> Optional[SymmetricKey]:
-        key = {'algorithm': SymmetricAlgorithms.AES}
-        return AESKey(key=key)
+        return AESKey.new_key()
 
     # Override
     def parse_symmetric_key(self, key: dict) -> Optional[SymmetricKey]:
@@ -209,4 +212,5 @@ class AESKeyFactory(SymmetricKeyFactory):
         if key.get('data') is None:
             # key.data should not be empty
             return None
+        # OK
         return AESKey(key=key)

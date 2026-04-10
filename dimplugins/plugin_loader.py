@@ -23,111 +23,49 @@
 # SOFTWARE.
 # ==============================================================================
 
-from dimp import *
+from dimp import SymmetricAlgorithms, AsymmetricAlgorithms
+from dimp import SymmetricKey, PublicKey, PrivateKey
 
-from .format import *
-from .crypto import *
-from .mkm import *
+from .format.coder import CoderMixIn
+from .format.trans import TransportableMixIn
+
+from .crypto.digest import DigestMixIn
+from .crypto import AESKey, AESKeyFactory, PlainKeyFactory
+from .crypto import ECCPublicKeyFactory, ECCPrivateKeyFactory
+from .crypto import RSAPublicKeyFactory, RSAPrivateKeyFactory
 
 
 # noinspection PyMethodMayBeStatic
-class PluginLoader:
+class CryptoMixIn:
+    """ Crypto Plugins """
 
-    def load(self):
-        """ Register plugins """
-        self._register_coders()
-        self._register_digesters()
-
-        self._register_symmetric_key_factories()
-        self._register_asymmetric_key_factories()
-
-        self._register_entity_factories()
-
-    def _register_coders(self):
-        """ Data coders """
-        self._register_base58_coder()
-        self._register_base64_coder()
-        self._register_hex_coder()
-
-        self._register_utf8_coder()
-        self._register_json_coder()
-
-        self._register_pnf_factory()
-        self._register_ted_factory()
-
-    def _register_base58_coder(self):
-        # Base58 coding
-        Base58.coder = Base58Coder()
-
-    def _register_base64_coder(self):
-        # Base64 coding
-        Base64.coder = Base64Coder()
-
-    def _register_hex_coder(self):
-        # HEX coding
-        Hex.coder = HexCoder()
-
-    def _register_utf8_coder(self):
-        # UTF8
-        UTF8.coder = UTF8Coder()
-
-    def _register_json_coder(self):
-        # JSON
-        JSON.coder = JSONCoder()
-
-    def _register_pnf_factory(self):
-        # PNF
-        factory = BaseNetworkFileFactory()
-        PortableNetworkFile.set_factory(factory=factory)
-
-    def _register_ted_factory(self):
-        # TED
-        factory = Base64DataFactory()
-        TransportableData.set_factory(algorithm=EncodeAlgorithms.BASE_64, factory=factory)
-        # TransportableData.register(algorithm=EncodeAlgorithms.DEFAULT, factory=factory)
-        TransportableData.set_factory(algorithm='*', factory=factory)
-
-    def _register_digesters(self):
-        """ Data digesters """
-        self._register_sha256_digester()
-        self._register_keccak256_digester()
-        self._register_ripemd160_digester()
-
-    def _register_sha256_digester(self):
-        # SHA256
-        SHA256.digester = SHA256Digester()
-
-    def _register_keccak256_digester(self):
-        # KECCAK256
-        KECCAK256.digester = KECCAK256Digester()
-
-    def _register_ripemd160_digester(self):
-        # RIPEMD160
-        RIPEMD160.digester = RIPEMD160Digester()
-
-    def _register_symmetric_key_factories(self):
-        """ Symmetric key parsers """
-        self._register_aes_key_factory()
-        self._register_plain_key_factory()
-
-    def _register_aes_key_factory(self):
+    # protected
+    def register_aes_key_factory(self):
         # Symmetric Key: AES
         factory = AESKeyFactory()
         SymmetricKey.set_factory(algorithm=SymmetricAlgorithms.AES, factory=factory)
         SymmetricKey.set_factory(algorithm=AESKey.AES_CBC_PKCS7, factory=factory)
         # SymmetricKey.set_factory(algorithm='AES/CBC/PKCS7Padding', factory=factory)
 
-    def _register_plain_key_factory(self):
+    # protected
+    def register_plain_key_factory(self):
         # Symmetric Key: Plain
         factory = PlainKeyFactory()
         SymmetricKey.set_factory(algorithm=SymmetricAlgorithms.PLAIN, factory=factory)
 
-    def _register_asymmetric_key_factories(self):
-        """ Asymmetric key parsers """
-        self._register_rsa_key_factories()
-        self._register_ecc_key_factories()
+    # protected
+    def register_ecc_key_factories(self):
+        # Public Key: ECC
+        ecc_pub = ECCPublicKeyFactory()
+        PublicKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pub)
+        PublicKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pub)
+        # Private Key: ECC
+        ecc_pri = ECCPrivateKeyFactory()
+        PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pri)
+        PrivateKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pri)
 
-    def _register_rsa_key_factories(self):
+    # protected
+    def register_rsa_key_factories(self):
         # Public Key: RSA
         rsa_pub = RSAPublicKeyFactory()
         PublicKey.set_factory(algorithm=AsymmetricAlgorithms.RSA, factory=rsa_pub)
@@ -139,47 +77,37 @@ class PluginLoader:
         PrivateKey.set_factory(algorithm='SHA256withRSA', factory=rsa_pri)
         PrivateKey.set_factory(algorithm='RSA/ECB/PKCS1Padding', factory=rsa_pri)
 
-    def _register_ecc_key_factories(self):
-        # Public Key: ECC
-        ecc_pub = ECCPublicKeyFactory()
-        PublicKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pub)
-        PublicKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pub)
-        # Private Key: ECC
-        ecc_pri = ECCPrivateKeyFactory()
-        PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pri)
-        PrivateKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pri)
 
-    def _register_entity_factories(self):
-        """ ID, Address, Meta, Document parsers """
-        self._register_id_factory()
-        self._register_address_factory()
-        self._register_meta_factories()
-        self._register_document_factories()
+# noinspection PyMethodMayBeStatic
+class PluginLoader(CoderMixIn, TransportableMixIn, DigestMixIn, CryptoMixIn):
 
-    def _register_id_factory(self):
-        ID.set_factory(factory=GeneralIdentifierFactory())
+    def load(self):
+        """ Register plugins """
+        self._load_data_coders()
+        self._load_message_digesters()
+        self._load_crypto_key_factories()
 
-    def _register_address_factory(self):
-        Address.set_factory(factory=BaseAddressFactory())
+    def _load_data_coders(self):
+        """ Data coders """
+        self.register_base58_coder()
+        self.register_base64_coder()
+        self.register_hex_coder()
 
-    def _register_meta_factories(self):
-        self._set_meta_factory(version=MetaType.MKM, alias='mkm')
-        self._set_meta_factory(version=MetaType.BTC, alias='btc')
-        self._set_meta_factory(version=MetaType.ETH, alias='eth')
+        self.register_utf8_coder()
+        self.register_json_coder()
 
-    def _set_meta_factory(self, version: str, alias: str, factory: MetaFactory = None):
-        if factory is None:
-            factory = BaseMetaFactory(version=version)
-        Meta.set_factory(version=version, factory=factory)
-        Meta.set_factory(version=alias, factory=factory)
+        self.register_pnf_factory()
+        self.register_ted_factory()
 
-    def _register_document_factories(self):
-        self._set_document_factory(doc_type='*')
-        self._set_document_factory(doc_type=DocumentType.VISA)
-        self._set_document_factory(doc_type=DocumentType.PROFILE)
-        self._set_document_factory(doc_type=DocumentType.BULLETIN)
+    def _load_message_digesters(self):
+        """ Data digesters """
+        self.register_sha256_digester()
+        self.register_keccak256_digester()
+        self.register_ripemd160_digester()
 
-    def _set_document_factory(self, doc_type: str, factory: DocumentFactory = None):
-        if factory is None:
-            factory = GeneralDocumentFactory(doc_type=doc_type)
-        Document.set_factory(doc_type=doc_type, factory=factory)
+    def _load_crypto_key_factories(self):
+        """ Crypto key parsers """
+        self.register_aes_key_factory()
+        self.register_plain_key_factory()
+        self.register_ecc_key_factories()
+        self.register_rsa_key_factories()

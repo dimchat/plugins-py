@@ -35,6 +35,7 @@ import hashlib
 from Crypto.Hash import keccak
 
 from dimp import MessageDigester
+from dimp import SHA256, KECCAK256, RIPEMD160
 
 
 class SHA256Digester(MessageDigester):
@@ -64,3 +65,23 @@ class RIPEMD160Digester(MessageDigester):
         hash_obj = hashlib.new('ripemd160')
         hash_obj.update(data)
         return hash_obj.digest()
+
+
+# noinspection PyMethodMayBeStatic
+class DigestMixIn:
+    """ Digest Plugins """
+
+    # protected
+    def register_sha256_digester(self):
+        # SHA256
+        SHA256.digester = SHA256Digester()
+
+    # protected
+    def register_keccak256_digester(self):
+        # KECCAK256
+        KECCAK256.digester = KECCAK256Digester()
+
+    # protected
+    def register_ripemd160_digester(self):
+        # RIPEMD160
+        RIPEMD160.digester = RIPEMD160Digester()

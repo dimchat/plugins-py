@@ -23,6 +23,10 @@
 # SOFTWARE.
 # ==============================================================================
 
+from .keys import BaseKey
+from .keys import BaseSymmetricKey, BaseAsymmetricKey
+from .keys import BasePublicKey, BasePrivateKey
+
 from .plain import PlainKey, PlainKeyFactory
 from .aes import AESKey, AESKeyFactory
 
@@ -33,9 +37,18 @@ from .ecc import ECCPublicKey, ECCPublicKeyFactory
 from .ecc import ECCPrivateKey, ECCPrivateKeyFactory
 
 from .digest import SHA256Digester, KECCAK256Digester, RIPEMD160Digester
+# from .digest import DigestMixIn
 
 
 __all__ = [
+
+    #
+    #   Crypto Keys
+    #
+
+    'BaseKey',
+    'BaseSymmetricKey', 'BaseAsymmetricKey',
+    'BasePublicKey', 'BasePrivateKey',
 
     'PlainKey', 'PlainKeyFactory',
     'AESKey', 'AESKeyFactory',
@@ -51,5 +64,6 @@ __all__ = [
     #
 
     'SHA256Digester', 'KECCAK256Digester', 'RIPEMD160Digester',
+    # 'DigestMixIn',
 
 ]

@@ -34,7 +34,10 @@ from dimp import AsymmetricAlgorithms
 from dimp import EncryptKey, DecryptKey
 from dimp import PublicKey, PublicKeyFactory
 from dimp import PrivateKey, PrivateKeyFactory
-from dimp import BaseKey, BasePublicKey, BasePrivateKey
+from dimp import TransportableData
+from dimp import PlainData
+
+from .keys import BaseKey, BasePublicKey, BasePrivateKey
 
 
 class RSAPublicKey(BasePublicKey, EncryptKey):
@@ -42,25 +45,31 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
 
     def __init__(self, key: Dict):
         super().__init__(key)
-        self.__key = None
-        self.__data = None
+        # lazy load
+        self.__key: Optional[RSA.RsaKey] = None
+        self.__data: Optional[TransportableData] = None
 
     @property  # private
     def rsa_key(self) -> RSA.RsaKey:
-        if self.__key is None:
+        verify_key = self.__key
+        if verify_key is None:
             # data in 'PEM' format
             data = self.get('data')
             assert data is not None, 'failed to get key data: %s' % self
-            self.__key = RSA.importKey(data)
-        return self.__key
+            verify_key = RSA.importKey(data)
+            self.__key = verify_key
+        return verify_key
 
     @property  # Override
-    def data(self) -> bytes:
-        if self.__data is None:
+    def data(self) -> TransportableData:
+        ted = self.__data
+        if ted is None:
             rsa_key = self.rsa_key
             assert rsa_key is not None, 'rsa key error: %s' % self
-            self.__data = rsa_key.exportKey(format='DER')
-        return self.__data
+            binary = rsa_key.exportKey(format='DER')
+            ted = PlainData.create(binary=binary)
+            self.__data = ted
+        return ted
 
     @property
     def size(self) -> int:
@@ -75,9 +84,9 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
             return int(bits)
 
     # Override
-    def encrypt(self, data: bytes, extra: Optional[Dict] = None) -> bytes:
+    def encrypt(self, plaintext: bytes, extra: Optional[Dict] = None) -> bytes:
         cipher = Cipher_PKCS1_v1_5.new(self.rsa_key)
-        return cipher.encrypt(data)
+        return cipher.encrypt(plaintext)
 
     # Override
     def verify(self, data: bytes, signature: bytes) -> bool:
@@ -96,22 +105,26 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
 
     def __init__(self, key: Dict):
         super().__init__(key)
-        # check key data
-        pem: str = key.get('data')
-        if pem is None or len(pem) == 0:
-            # generate private key data
-            rsa_key, data = generate(bits=self.bits)
-            # store private key in PKCS#1 format
-            pem = data.decode('utf-8')
-            self.__key = rsa_key
-            self.__data = data
-            self['data'] = pem
-            self['mode'] = 'ECB'
-            self['padding'] = 'PKCS1'
-            self['digest'] = 'SHA256'
-        else:
-            self.__key = None
-            self.__data = None
+        # lazy load
+        self.__key: Optional[RSA.RsaKey] = None
+        self.__data: Optional[TransportableData] = None
+
+    @classmethod
+    def new_key(cls, bits: int = 1024) -> PrivateKey:
+        """ generate new private key """
+        rsa_key = RSA.generate(bits=bits)
+        # store private key in PKCS#1 format
+        pem = rsa_key.exportKey(format='PEM', pkcs=1).decode('utf-8')
+        key = RSAPrivateKey(key={
+            'algorithm': AsymmetricAlgorithms.RSA,
+            'data': pem,
+            'mode': 'ECB',
+            'padding': 'PKCS1',
+            'digest': 'SHA256',
+        })
+        key.__key = rsa_key
+        # key.__data = PlainData.create(binary=rsa_key.exportKey(format='DER'))
+        return key
 
     @property  # private
     def rsa_key(self) -> RSA.RsaKey:
@@ -129,12 +142,15 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
         return self.__key
 
     @property  # Override
-    def data(self) -> bytes:
-        if self.__data is None:
+    def data(self) -> TransportableData:
+        ted = self.__data
+        if ted is None:
             rsa_key = self.rsa_key
             assert rsa_key is not None, 'rsa key error: %s' % self
-            self.__data = rsa_key.exportKey(format='DER')
-        return self.__data
+            binary = rsa_key.exportKey(format='DER')
+            ted = PlainData.create(binary=binary)
+            self.__data = ted
+        return ted
 
     @property
     def size(self) -> int:
@@ -151,22 +167,24 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
     @property  # Override
     def public_key(self) -> Union[PublicKey, EncryptKey]:
         pub = self.rsa_key.publickey()
-        pem = pub.exportKey().decode('utf-8')
-        info = {
+        pem = pub.exportKey(format='PEM', pkcs=1).decode('utf-8')
+        key = RSAPublicKey(key={
             'algorithm': AsymmetricAlgorithms.RSA,
             'data': pem,
             'mode': 'ECB',
             'padding': 'PKCS1',
             'digest': 'SHA256'
-        }
-        return RSAPublicKey(info)
+        })
+        key.__key = pub
+        # key.__data = PlainData.create(binary=pub.exportKey(format='DER'))
+        return key
 
     # Override
-    def decrypt(self, data: bytes, params: Optional[Dict] = None) -> Optional[bytes]:
+    def decrypt(self, ciphertext: bytes, params: Optional[Dict] = None) -> Optional[bytes]:
         sentinel: Optional[bytes] = None
         try:
             cipher = Cipher_PKCS1_v1_5.new(self.rsa_key)
-            return cipher.decrypt(data, sentinel)
+            return cipher.decrypt(ciphertext, sentinel)
         except ValueError:
             return None
 
@@ -179,11 +197,6 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
     # Override
     def match_encrypt_key(self, key: EncryptKey) -> bool:
         return BaseKey.match_encrypt_key(encrypt_key=key, decrypt_key=self)
-
-
-def generate(bits: int) -> (RSA.RsaKey, bytes):
-    key = RSA.generate(bits=bits)
-    return key, key.exportKey()
 
 
 """
@@ -200,6 +213,7 @@ class RSAPublicKeyFactory(PublicKeyFactory):
         if key.get('data') is None:
             # key.data should not be empty
             return None
+        # OK
         return RSAPublicKey(key)
 
 
@@ -207,8 +221,7 @@ class RSAPrivateKeyFactory(PrivateKeyFactory):
 
     # Override
     def generate_private_key(self) -> Optional[PrivateKey]:
-        key = {'algorithm': AsymmetricAlgorithms.RSA}
-        return RSAPrivateKey(key)
+        return RSAPrivateKey.new_key()
 
     # Override
     def parse_private_key(self, key: dict) -> Optional[PrivateKey]:
@@ -216,4 +229,5 @@ class RSAPrivateKeyFactory(PrivateKeyFactory):
         if key.get('data') is None:
             # key.data should not be empty
             return None
+        # OK
         return RSAPrivateKey(key)

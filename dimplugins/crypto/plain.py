@@ -27,7 +27,10 @@ from typing import Optional, Dict
 
 from dimp import SymmetricAlgorithms
 from dimp import SymmetricKey, SymmetricKeyFactory
-from dimp import BaseSymmetricKey
+from dimp import TransportableData
+from dimp import PlainData
+
+from .keys import BaseKey, BaseSymmetricKey
 
 
 class PlainKey(BaseSymmetricKey):
@@ -36,25 +39,31 @@ class PlainKey(BaseSymmetricKey):
         which will do nothing when en/decoding message data
     """
 
-    def __init__(self):
-        key = {'algorithm': SymmetricAlgorithms.PLAIN}
-        super().__init__(key)
+    # def __init__(self, key: Dict):
+    #     super().__init__(key)
+
+    @classmethod
+    def new_key(cls) -> SymmetricKey:
+        return PlainKey(key={
+            'algorithm': SymmetricAlgorithms.PLAIN,
+        })
 
     @property
     def size(self) -> int:
         return 0
 
     @property  # Override
-    def data(self) -> bytes:
-        return b''
+    def data(self) -> TransportableData:
+        # empty data
+        return PlainData.zero()
 
     # Override
-    def encrypt(self, data: bytes, extra: Optional[Dict] = None) -> bytes:
-        return data
+    def encrypt(self, plaintext: bytes, extra: Optional[Dict] = None) -> bytes:
+        return plaintext
 
     # Override
-    def decrypt(self, data: bytes, params: Optional[Dict] = None) -> Optional[bytes]:
-        return data
+    def decrypt(self, ciphertext: bytes, params: Optional[Dict] = None) -> Optional[bytes]:
+        return ciphertext
 
 
 """
@@ -65,14 +74,19 @@ class PlainKey(BaseSymmetricKey):
 
 class PlainKeyFactory(SymmetricKeyFactory):
 
-    def __init__(self):
-        super().__init__()
-        self.__plain_key = PlainKey()
+    # def __init__(self):
+    #     super().__init__()
 
     # Override
     def generate_symmetric_key(self) -> Optional[SymmetricKey]:
-        return self.__plain_key
+        return PlainKey.new_key()
 
     # Override
     def parse_symmetric_key(self, key: dict) -> Optional[SymmetricKey]:
-        return self.__plain_key
+        # check 'algorithm'
+        algorithm = BaseKey.get_key_algorithm(key=key)
+        if algorithm != SymmetricAlgorithms.PLAIN:
+            # algorithm not matched
+            return None
+        # OK
+        return PlainKey(key)

@@ -36,7 +36,9 @@ import json
 import base64
 import base58
 
-from dimp import DataCoder, ObjectCoder, StringCoder
+from dimp import DataCoder, Hex, Base58, Base64
+from dimp import ObjectCoder, JSON
+from dimp import StringCoder, UTF8
 
 
 class Base64Coder(DataCoder):
@@ -104,3 +106,33 @@ class UTF8Coder(StringCoder):
     def decode(self, data: bytes) -> Optional[str]:
         """ UTF-8 decode """
         return data.decode('utf-8')
+
+
+# noinspection PyMethodMayBeStatic
+class CoderMixIn:
+    """ Coder Plugins """
+
+    # protected
+    def register_utf8_coder(self):
+        # UTF8
+        UTF8.coder = UTF8Coder()
+
+    # protected
+    def register_json_coder(self):
+        # JSON
+        JSON.coder = JSONCoder()
+
+    # protected
+    def register_hex_coder(self):
+        # HEX coding
+        Hex.coder = HexCoder()
+
+    # protected
+    def register_base58_coder(self):
+        # Base58 coding
+        Base58.coder = Base58Coder()
+
+    # protected
+    def register_base64_coder(self):
+        # Base64 coding
+        Base64.coder = Base64Coder()

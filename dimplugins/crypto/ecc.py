@@ -31,7 +31,10 @@ import ecdsa
 from dimp import AsymmetricAlgorithms
 from dimp import PublicKey, PublicKeyFactory
 from dimp import PrivateKey, PrivateKeyFactory
-from dimp import BasePublicKey, BasePrivateKey
+from dimp import TransportableData
+from dimp import PlainData
+
+from .keys import BasePublicKey, BasePrivateKey
 
 
 class ECCPublicKey(BasePublicKey):
@@ -39,8 +42,9 @@ class ECCPublicKey(BasePublicKey):
 
     def __init__(self, key: Dict):
         super().__init__(key)
-        self.__key = None
-        self.__data = None
+        # lazy load
+        self.__key: Optional[ecdsa.VerifyingKey] = None
+        self.__data: Optional[TransportableData] = None
 
     @property
     def curve(self):
@@ -56,29 +60,35 @@ class ECCPublicKey(BasePublicKey):
 
     @property  # private
     def ecc_key(self) -> ecdsa.VerifyingKey:
-        if self.__key is None:
+        verify_key = self.__key
+        if verify_key is None:
             # data in 'PEM' format
             data = self.get('data')
             assert data is not None, 'failed to get key data: %s' % self
             data_len = len(data)
             if data_len == 130 or data_len == 128:
                 data = bytes.fromhex(data)
-                self.__key = ecdsa.VerifyingKey.from_string(data, curve=self.curve, hashfunc=self.hash_func)
+                verify_key = ecdsa.VerifyingKey.from_string(data, curve=self.curve, hashfunc=self.hash_func)
             else:
-                self.__key = ecdsa.VerifyingKey.from_pem(data, hashfunc=self.hash_func)
-        return self.__key
+                verify_key = ecdsa.VerifyingKey.from_pem(data, hashfunc=self.hash_func)
+            self.__key = verify_key
+        return verify_key
 
     @property  # Override
-    def data(self) -> bytes:
-        if self.__data is None:
+    def data(self) -> TransportableData:
+        ted = self.__data
+        if ted is None:
             ecc_key = self.ecc_key
             assert ecc_key is not None, 'ecc key error: %s' % self
             if self.compressed:
                 encoding = 'compressed'
             else:
                 encoding = 'uncompressed'
-            self.__data = ecc_key.to_string(encoding=encoding)
-        return self.__data
+            # get key data
+            binary = ecc_key.to_string(encoding=encoding)
+            ted = PlainData.create(binary=binary)
+            self.__data = ted
+        return ted
 
     @property
     def compressed(self) -> bool:
@@ -110,22 +120,27 @@ class ECCPrivateKey(BasePrivateKey):
 
     def __init__(self, key: Dict):
         super().__init__(key)
-        # check key data
-        pem: str = key.get('data')
-        if pem is None or len(pem) == 0:
-            # generate private key data
-            ecc_key, data = generate(curve=self.curve, hash_func=self.hash_func)
-            # store private key in PKCS#8 format
-            pem = ecc_key.to_pem(format='pkcs8').decode('utf-8')
-            # pem = data.hex()
-            self.__key = ecc_key
-            self.__data = data
-            self['data'] = pem
-            self['curve'] = 'SECP256k1'
-            self['digest'] = 'SHA256'
-        else:
-            self.__key = None
-            self.__data = None
+        # lazy load
+        self.__key: Optional[ecdsa.SigningKey] = None
+        self.__data: Optional[TransportableData] = None
+
+    @classmethod
+    def new_key(cls) -> PrivateKey:
+        """ generate new private key """
+        curve = ecdsa.SECP256k1
+        hash_func = hashlib.sha256
+        ecc_key = ecdsa.SigningKey.generate(curve=curve, hashfunc=hash_func)
+        # store private key in PKCS#8 format
+        pem = ecc_key.to_pem(format='pkcs8').decode('utf-8')
+        key = ECCPrivateKey(key={
+            'algorithm': AsymmetricAlgorithms.ECC,
+            'data': pem,
+            'curve': 'SECP256k1',
+            'digest': 'SHA256',
+        })
+        key.__key = ecc_key
+        # key.__data = PlainData.create(binary=ecc_key.to_string())
+        return key
 
     @property
     def curve(self):
@@ -141,25 +156,30 @@ class ECCPrivateKey(BasePrivateKey):
 
     @property  # private
     def ecc_key(self) -> ecdsa.SigningKey:
-        if self.__key is None:
+        sign_key = self.__key
+        if sign_key is None:
             data = self.get('data')
             assert data is not None, 'failed to get key data: %s' % self
             if len(data) == 64:
                 # key data in 'HEX' format
                 data = bytes.fromhex(data)
-                self.__key = ecdsa.SigningKey.from_string(data, curve=self.curve, hashfunc=self.hash_func)
+                sign_key = ecdsa.SigningKey.from_string(data, curve=self.curve, hashfunc=self.hash_func)
             else:
                 # key data in 'PEM' format
-                self.__key = ecdsa.SigningKey.from_pem(data, hashfunc=self.hash_func)
-        return self.__key
+                sign_key = ecdsa.SigningKey.from_pem(data, hashfunc=self.hash_func)
+            self.__key = sign_key
+        return sign_key
 
     @property  # Override
-    def data(self) -> bytes:
-        if self.__data is None:
+    def data(self) -> TransportableData:
+        ted = self.__data
+        if ted is None:
             ecc_key = self.ecc_key
             assert ecc_key is not None, 'ecc key error: %s' % self
-            self.__data = ecc_key.to_string()
-        return self.__data
+            binary = ecc_key.to_string()
+            ted = PlainData.create(binary=binary)
+            self.__data = ted
+        return ted
 
     @property
     def size(self) -> int:
@@ -178,23 +198,20 @@ class ECCPrivateKey(BasePrivateKey):
         pub = self.ecc_key.get_verifying_key()
         pem = pub.to_pem().decode('utf-8')
         # pem = key.to_string(encoding='uncompressed').hex()
-        info = {
+        key = ECCPublicKey(key={
             'algorithm': AsymmetricAlgorithms.ECC,
             'data': pem,
             'curve': 'SECP256k1',
             'digest': 'SHA256'
-        }
-        return ECCPublicKey(info)
+        })
+        key.__key = pub
+        # key.__data = PlainData.create(binary=pub.to_string())
+        return key
 
     # Override
     def sign(self, data: bytes) -> bytes:
         signer = self.ecc_key
         return signer.sign(data=data, hashfunc=self.hash_func, sigencode=self.sig_encode)
-
-
-def generate(curve, hash_func) -> (ecdsa.SigningKey, bytes):
-    key = ecdsa.SigningKey.generate(curve=curve, hashfunc=hash_func)
-    return key, key.to_string()
 
 
 """
@@ -211,6 +228,7 @@ class ECCPublicKeyFactory(PublicKeyFactory):
         if key.get('data') is None:
             # key.data should not be empty
             return None
+        # OK
         return ECCPublicKey(key)
 
 
@@ -218,8 +236,7 @@ class ECCPrivateKeyFactory(PrivateKeyFactory):
 
     # Override
     def generate_private_key(self) -> Optional[PrivateKey]:
-        key = {'algorithm': AsymmetricAlgorithms.ECC}
-        return ECCPrivateKey(key)
+        return ECCPrivateKey.new_key()
 
     # Override
     def parse_private_key(self, key: dict) -> Optional[PrivateKey]:
@@ -227,4 +244,5 @@ class ECCPrivateKeyFactory(PrivateKeyFactory):
         if key.get('data') is None:
             # key.data should not be empty
             return None
+        # OK
         return ECCPrivateKey(key)
