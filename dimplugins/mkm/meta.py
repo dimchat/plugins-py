@@ -32,13 +32,13 @@ from typing import Optional, Dict
 
 from dimp import utf8_encode
 from dimp import TransportableData
+from dimp import Base64Data
 from dimp import VerifyKey, SignKey, PrivateKey
 from dimp import EntityType, Address
 from dimp import MetaType
 from dimp import Meta, MetaFactory
 from dimp import BaseMeta
-
-from dimp.ext import SharedAccountExtensions
+from dimp import GeneralAccountHelper, shared_account_extensions
 
 from .btc import BTCAddress
 from .eth import ETHAddress
@@ -49,7 +49,7 @@ from .eth import ETHAddress
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     version:
-        0x01 - MKM
+        1 - MKM
 
     algorithm:
         CT      = fingerprint = sKey.sign(seed);
@@ -80,7 +80,8 @@ class DefaultMeta(BaseMeta):
         cached = self.__addresses.get(network)
         if cached is None:
             # generate and cache it
-            data = self.fingerprint
+            ted = self.fingerprint
+            data = ted.binary
             cached = BTCAddress.from_data(data, network=network)
             self.__addresses[network] = cached
         return cached
@@ -91,8 +92,7 @@ class DefaultMeta(BaseMeta):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     version:
-        0x02 - BTC
-        0x03 - ExBTC
+        2 - BTC
 
     algorithm:
         CT      = key.data;
@@ -124,7 +124,8 @@ class BTCMeta(BaseMeta):
         if cached is None:
             # TODO: compress public key?
             key = self.public_key
-            data = key.data
+            ted = key.data
+            data = ted.binary
             # generate and cache it
             cached = BTCAddress.from_data(data, network=network)
             self.__addresses[network] = cached
@@ -136,8 +137,7 @@ class BTCMeta(BaseMeta):
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     version:
-        0x04 - ETH
-        0x05 - ExETH
+        4 - ETH
 
     algorithm:
         fingerprint = key.data
@@ -168,7 +168,8 @@ class ETHMeta(BaseMeta):
         if cached is None:  # or cached.type != network:
             # 64 bytes key data without prefix 0x04
             key = self.public_key
-            data = key.data
+            ted = key.data
+            data = ted.binary
             # generate and cache it
             cached = ETHAddress.from_data(data)
             self.__address = cached
@@ -191,7 +192,7 @@ class BaseMetaFactory(MetaFactory):
             fingerprint = None
         else:
             sig = private_key.sign(data=utf8_encode(string=seed))
-            fingerprint = TransportableData.create(data=sig)
+            fingerprint = Base64Data.create(binary=sig)
         assert isinstance(private_key, PrivateKey), 'private key error: %s' % private_key
         public_key = private_key.public_key
         return self.create_meta(public_key=public_key, seed=seed, fingerprint=fingerprint)
@@ -199,11 +200,11 @@ class BaseMetaFactory(MetaFactory):
     # Override
     def create_meta(self, public_key: VerifyKey, seed: Optional[str], fingerprint: Optional[TransportableData]) -> Meta:
         version = self.type
-        if version == MetaType.MKM or version == 'mkm':
+        if version == MetaType.MKM:
             out = DefaultMeta(version=version, public_key=public_key, seed=seed, fingerprint=fingerprint)
-        elif version == MetaType.BTC or version == 'btc':
+        elif version == MetaType.BTC:
             out = BTCMeta(version=version, public_key=public_key)
-        elif version == MetaType.ETH or version == 'eth':
+        elif version == MetaType.ETH:
             out = ETHMeta(version=version, public_key=public_key)
         else:
             raise TypeError('unknown meta type: %s' % version)
@@ -212,26 +213,32 @@ class BaseMetaFactory(MetaFactory):
 
     # Override
     def parse_meta(self, meta: dict) -> Optional[Meta]:
-        # # check 'type', 'key', 'seed', 'fingerprint'
-        # if 'type' not in meta or 'key' not in meta:
-        #     # meta.type should not be empty
-        #     # meta.key should not be empty
-        #     return None
-        # elif 'seed' not in meta:
-        #     if 'fingerprint' in meta:
-        #         assert False, 'meta error: %s' % meta
-        # elif 'fingerprint' not in meta:
-        #     assert False, 'meta error: %s' % meta
-        ext = SharedAccountExtensions()
-        version = ext.helper.get_meta_type(meta=meta)
-        if version == MetaType.MKM or version == 'mkm':
+        # check 'type', 'key', 'seed', 'fingerprint'
+        if 'type' not in meta or 'key' not in meta:
+            # meta.type should not be empty
+            # meta.key should not be empty
+            return None
+        elif 'seed' not in meta:
+            if 'fingerprint' in meta:
+                assert False, 'meta error: %s' % meta
+        elif 'fingerprint' not in meta:
+            assert False, 'meta error: %s' % meta
+        helper = account_helper()
+        version = helper.get_meta_type(meta=meta)
+        if version == MetaType.MKM:
             out = DefaultMeta(meta=meta)
-        elif version == MetaType.BTC or version == 'btc':
+        elif version == MetaType.BTC:
             out = BTCMeta(meta=meta)
-        elif version == MetaType.ETH or version == 'eth':
+        elif version == MetaType.ETH:
             out = ETHMeta(meta=meta)
         else:
             raise TypeError('unknown meta type: %s' % version)
         if out.valid:
             return out
         # assert False, 'meta error: %s' % meta
+
+
+def account_helper() -> GeneralAccountHelper:
+    helper = shared_account_extensions.helper
+    assert isinstance(helper, GeneralAccountHelper), 'account helper error: %s' % helper
+    return helper

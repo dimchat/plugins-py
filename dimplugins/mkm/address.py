@@ -29,11 +29,14 @@
 # ==============================================================================
 
 from abc import ABC
-from typing import Optional, Dict
+from typing import Optional
 
 from dimp import Address, AddressFactory
 from dimp import ANYWHERE, EVERYWHERE
 from dimp import Meta
+from dimp import AccountExtensions, shared_account_extensions
+
+from ..mem import MemoryCache, ThanosCache
 
 from .btc import BTCAddress
 from .eth import ETHAddress
@@ -45,25 +48,21 @@ class BaseAddressFactory(AddressFactory, ABC):
         ~~~~~~~~~~~~~~~~~~~~
     """
 
-    def __init__(self):
-        super().__init__()
-        self._addresses: Dict[str, Address] = {}
-
     # Override
-    def generate_address(self, meta: Meta, network: int = None) -> Optional[Address]:
+    def generate_address(self, meta: Meta, network: int = None) -> Address:
         address = meta.generate_address(network=network)
-        if address is None:
-            assert False, 'failed to generate address with meta: %s' % meta
-        self._addresses[str(address)] = address
+        cache = address_cache()
+        cache.put(key=str(address), value=address)
         return address
 
     # Override
     def parse_address(self, address: str) -> Optional[Address]:
-        add = self._addresses.get(address)
+        cache = address_cache()
+        add = cache.get(key=address)
         if add is None:
             add = self._parse(address=address)
             if add is not None:
-                self._addresses[address] = add
+                cache.put(key=address, value=add)
         return add
 
     # noinspection PyMethodMayBeStatic
@@ -91,3 +90,29 @@ class BaseAddressFactory(AddressFactory, ABC):
         # TODO: other types of address
         assert res is not None, 'invalid address: %s' % address
         return res
+
+
+def address_cache() -> MemoryCache[str, Address]:
+    cache = shared_account_extensions.address_cache
+    assert isinstance(cache, MemoryCache), 'address cache error: %s' % cache
+    return cache
+
+
+# -----------------------------------------------------------------------------
+#  Memory Cache Extensions
+# -----------------------------------------------------------------------------
+
+
+class _AddressCacheExt:
+    _address_cache: MemoryCache[str, Address] = ThanosCache()
+
+    @property
+    def address_cache(self) -> MemoryCache[str, Address]:
+        return _AddressCacheExt._address_cache
+
+    @address_cache.setter
+    def address_cache(self, cache: MemoryCache):
+        _AddressCacheExt._address_cache = cache
+
+
+AccountExtensions.address_cache = _AddressCacheExt.address_cache

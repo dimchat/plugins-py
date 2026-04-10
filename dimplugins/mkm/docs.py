@@ -31,12 +31,10 @@
 from typing import Optional, Dict
 
 from dimp import TransportableData
-from dimp import ID
 from dimp import DocumentType
 from dimp import Document, DocumentFactory
 from dimp import BaseDocument, BaseVisa, BaseBulletin
-
-from dimp.ext import SharedAccountExtensions
+from dimp import GeneralAccountHelper, shared_account_extensions
 
 
 class GeneralDocumentFactory(DocumentFactory):
@@ -51,44 +49,50 @@ class GeneralDocumentFactory(DocumentFactory):
         return self.__type
 
     # Override
-    def create_document(self, identifier: ID, data: Optional[str], signature: Optional[TransportableData]) -> Document:
-        doc_type = get_doc_type(doc_type=self.type, identifier=identifier)
+    def create_document(self, data: Optional[str], signature: Optional[TransportableData]) -> Document:
         if data is None or len(data) == 0:
-            assert signature is None, 'document error: %s, signature: %s' % (identifier, signature)
-            # create emtpy document
-            if doc_type == DocumentType.VISA:
-                return BaseVisa(identifier=identifier)
-            elif doc_type == DocumentType.BULLETIN:
-                return BaseBulletin(identifier=identifier)
-            else:
-                return BaseDocument(doc_type=doc_type, identifier=identifier)
+            assert signature is None, 'document error: %s, signature: %s' % (data, signature)
+            # 1. create empty document
+            return self._create_empty_document()
+        elif signature is None or signature.empty:
+            # assert False, 'document error: %s, signature: %s' % (data, signature)
+            return self._create_empty_document()
+        # 2. create document with data & signature from local storage
+        return self._create_valid_document(data=data, signature=signature)
+
+    def _create_empty_document(self) -> Document:
+        """ create a new empty document """
+        doc_type = self.type
+        if doc_type == DocumentType.VISA:
+            return BaseVisa()
+        elif doc_type == DocumentType.BULLETIN:
+            return BaseBulletin()
         else:
-            assert signature is not None, 'document error: %s, data: %s' % (identifier, data)
-            # create document with data & signature from local storage
-            if doc_type == DocumentType.VISA:
-                return BaseVisa(identifier=identifier, data=data, signature=signature)
-            elif doc_type == DocumentType.BULLETIN:
-                return BaseBulletin(identifier=identifier, data=data, signature=signature)
-            else:
-                return BaseDocument(doc_type=doc_type, identifier=identifier, data=data, signature=signature)
+            return BaseDocument(doc_type=doc_type)
+
+    def _create_valid_document(self, data: str, signature: TransportableData) -> Document:
+        """ create document with data & signature from local storage """
+        doc_type = self.type
+        if doc_type == DocumentType.VISA:
+            return BaseVisa(data=data, signature=signature)
+        elif doc_type == DocumentType.BULLETIN:
+            return BaseBulletin(data=data, signature=signature)
+        else:
+            return BaseDocument(doc_type=doc_type, data=data, signature=signature)
 
     # Override
     def parse_document(self, document: Dict) -> Optional[Document]:
         # check 'did', 'data', 'signature'
-        identifier = ID.parse(identifier=document.get('did'))
-        if identifier is None:
-            # assert False, 'document ID not found: %s' % document
-            return None
-        elif document.get('data') is None or document.get('signature') is None:
+        if 'data' not in document or 'signature' not in document:
             # document.data should not be empty
             # document.signature should not be empty
             return None
-        # check document type
-        ext = SharedAccountExtensions()
-        doc_type = ext.helper.get_document_type(document=document)
-        if doc_type is None:
-            doc_type = get_doc_type(doc_type='*', identifier=identifier)
-        # create with document type
+        # elif 'did' not in document:
+        #     # document.did should not be empty
+        #     return None
+        helper = account_helper()
+        # create document for type
+        doc_type = helper.get_document_type(document=document)
         if doc_type == DocumentType.VISA:
             return BaseVisa(document=document)
         elif doc_type == DocumentType.BULLETIN:
@@ -97,13 +101,7 @@ class GeneralDocumentFactory(DocumentFactory):
             return BaseDocument(document=document)
 
 
-def get_doc_type(doc_type: str, identifier: ID) -> str:
-    assert doc_type is not None and len(doc_type) > 0, 'document type empty'
-    if doc_type != '*':
-        return doc_type
-    elif identifier.is_group:
-        return DocumentType.BULLETIN
-    elif identifier.is_user:
-        return DocumentType.VISA
-    else:
-        return DocumentType.PROFILE
+def account_helper() -> GeneralAccountHelper:
+    helper = shared_account_extensions.helper
+    assert isinstance(helper, GeneralAccountHelper), 'account helper error: %s' % helper
+    return helper

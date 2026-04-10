@@ -33,14 +33,13 @@ from typing import Optional
 from dimp import ID, IDFactory, Identifier
 from dimp import Address
 from dimp import Meta
+from dimp import AccountExtensions, shared_account_extensions
+
+from ..mem import MemoryCache, ThanosCache
 
 
 class GeneralIdentifierFactory(IDFactory):
     """ General ID Factory """
-
-    def __init__(self):
-        super().__init__()
-        self._identifiers = {}  # str -> ID
 
     # Override
     def generate_id(self, meta: Meta, network: int, terminal: Optional[str]) -> ID:
@@ -51,19 +50,21 @@ class GeneralIdentifierFactory(IDFactory):
     # Override
     def create_id(self, name: Optional[str], address: Address, terminal: Optional[str]) -> ID:
         identifier = Identifier.concat(name=name, address=address, terminal=terminal)
-        did = self._identifiers.get(identifier)
+        cache = id_cache()
+        did = cache.get(key=identifier)
         if did is None:
             did = self._new_id(identifier=identifier, name=name, address=address, terminal=terminal)
-            self._identifiers[identifier] = did
+            cache.put(key=identifier, value=did)
         return did
 
     # Override
     def parse_id(self, identifier: str) -> Optional[ID]:
-        did = self._identifiers.get(identifier)
+        cache = id_cache()
+        did = cache.get(key=identifier)
         if did is None:
             did = self._parse(identifier=identifier)
             if did is not None:
-                self._identifiers[identifier] = did
+                cache.put(key=identifier, value=did)
         return did
 
     # noinspection PyMethodMayBeStatic
@@ -101,3 +102,29 @@ class GeneralIdentifierFactory(IDFactory):
             return self._new_id(identifier=identifier, name=name, address=address, terminal=terminal)
         else:
             assert False, 'ID error: %s' % identifier
+
+
+def id_cache() -> MemoryCache[str, ID]:
+    cache = shared_account_extensions.id_cache
+    assert isinstance(cache, MemoryCache), 'ID cache error: %s' % cache
+    return cache
+
+
+# -----------------------------------------------------------------------------
+#  Memory Cache Extensions
+# -----------------------------------------------------------------------------
+
+
+class _IdCacheExt:
+    _id_cache: MemoryCache[str, ID] = ThanosCache()
+
+    @property
+    def id_cache(self) -> MemoryCache[str, ID]:
+        return _IdCacheExt._id_cache
+
+    @id_cache.setter
+    def id_cache(self, cache: MemoryCache):
+        _IdCacheExt._id_cache = cache
+
+
+AccountExtensions.id_cache = _IdCacheExt.id_cache
