@@ -23,59 +23,12 @@
 # SOFTWARE.
 # ==============================================================================
 
-from dimp import SymmetricAlgorithms, AsymmetricAlgorithms
-from dimp import SymmetricKey, PublicKey, PrivateKey
-
 from .format.coder import CoderMixIn
 from .format.trans import TransportableMixIn
 
 from .crypto.digest import DigestMixIn
-from .crypto import AESKey, AESKeyFactory, PlainKeyFactory
-from .crypto import ECCPublicKeyFactory, ECCPrivateKeyFactory
-from .crypto import RSAPublicKeyFactory, RSAPrivateKeyFactory
 
-
-# noinspection PyMethodMayBeStatic
-class CryptoMixIn:
-    """ Crypto Plugins """
-
-    # protected
-    def register_aes_key_factory(self):
-        # Symmetric Key: AES
-        factory = AESKeyFactory()
-        SymmetricKey.set_factory(algorithm=SymmetricAlgorithms.AES, factory=factory)
-        SymmetricKey.set_factory(algorithm=AESKey.AES_CBC_PKCS7, factory=factory)
-        # SymmetricKey.set_factory(algorithm='AES/CBC/PKCS7Padding', factory=factory)
-
-    # protected
-    def register_plain_key_factory(self):
-        # Symmetric Key: Plain
-        factory = PlainKeyFactory()
-        SymmetricKey.set_factory(algorithm=SymmetricAlgorithms.PLAIN, factory=factory)
-
-    # protected
-    def register_ecc_key_factories(self):
-        # Public Key: ECC
-        ecc_pub = ECCPublicKeyFactory()
-        PublicKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pub)
-        PublicKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pub)
-        # Private Key: ECC
-        ecc_pri = ECCPrivateKeyFactory()
-        PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pri)
-        PrivateKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pri)
-
-    # protected
-    def register_rsa_key_factories(self):
-        # Public Key: RSA
-        rsa_pub = RSAPublicKeyFactory()
-        PublicKey.set_factory(algorithm=AsymmetricAlgorithms.RSA, factory=rsa_pub)
-        PublicKey.set_factory(algorithm='SHA256withRSA', factory=rsa_pub)
-        PublicKey.set_factory(algorithm='RSA/ECB/PKCS1Padding', factory=rsa_pub)
-        # Private Key: RSA
-        rsa_pri = RSAPrivateKeyFactory()
-        PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.RSA, factory=rsa_pri)
-        PrivateKey.set_factory(algorithm='SHA256withRSA', factory=rsa_pri)
-        PrivateKey.set_factory(algorithm='RSA/ECB/PKCS1Padding', factory=rsa_pri)
+from .plugin_keys import CryptoMixIn
 
 
 # noinspection PyMethodMayBeStatic
@@ -84,7 +37,9 @@ class PluginLoader(CoderMixIn, TransportableMixIn, DigestMixIn, CryptoMixIn):
     def load(self):
         """ Register plugins """
         self._load_data_coders()
+
         self._load_message_digesters()
+
         self._load_crypto_key_factories()
 
     def _load_data_coders(self):
@@ -102,12 +57,16 @@ class PluginLoader(CoderMixIn, TransportableMixIn, DigestMixIn, CryptoMixIn):
     def _load_message_digesters(self):
         """ Data digesters """
         self.register_sha256_digester()
+
         self.register_keccak256_digester()
+
         self.register_ripemd160_digester()
 
     def _load_crypto_key_factories(self):
         """ Crypto key parsers """
+        # Symmetric keys
         self.register_aes_key_factory()
         self.register_plain_key_factory()
+        # Asymmetric keys
         self.register_ecc_key_factories()
         self.register_rsa_key_factories()

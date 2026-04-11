@@ -30,9 +30,9 @@ from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import PublicKey, PublicKeyFactory
 from dimp import PrivateKey, PrivateKeyFactory
 
-from dimp.ext import GeneralCryptoHelper
-from dimp.ext import SymmetricKeyHelper
-from dimp.ext import PrivateKeyHelper, PublicKeyHelper
+from dimp import GeneralCryptoHelper
+from dimp import SymmetricKeyHelper
+from dimp import PrivateKeyHelper, PublicKeyHelper
 
 
 class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,

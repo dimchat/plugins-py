@@ -68,9 +68,10 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
     # Override
     def parse_envelope(self, envelope: Dict) -> Optional[Envelope]:
         # check 'sender'
-        if envelope.get('sender') is None:
+        if 'sender' not in envelope:
             # env.sender should not empty
             return None
+        # OK
         return MessageEnvelope(envelope=envelope)
 
     #
@@ -91,10 +92,11 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
     # Override
     def parse_instant_message(self, msg: Dict) -> Optional[InstantMessage]:
         # check 'sender', 'content'
-        if msg.get('sender') is None or msg.get('content') is None:
+        if 'sender' not in msg or 'content' not in msg:
             # msg.sender should not be empty
             # msg.content should not be empty
             return None
+        # OK
         return PlainMessage(msg=msg)
 
     #
@@ -104,13 +106,14 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
     # Override
     def parse_secure_message(self, msg: Dict) -> Optional[SecureMessage]:
         # check 'sender', 'data'
-        if msg.get('sender') is None or msg.get('data') is None:
+        if 'sender' not in msg or 'data' not in msg:
             # msg.sender should not be empty
             # msg.data should not be empty
             return None
         # check 'signature'
-        if msg.get('signature') is not None:
+        if 'signature' not in msg:
             return NetworkMessage(msg=msg)
+        # OK
         return EncryptedMessage(msg=msg)
 
     #
@@ -120,9 +123,10 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
     # Override
     def parse_reliable_message(self, msg: Dict) -> Optional[ReliableMessage]:
         # check 'sender', 'data', 'signature'
-        if msg.get('sender') is None or msg.get('data') is None or msg.get('signature') is None:
+        if 'sender' not in msg or 'data' not in msg or 'signature' not in msg:
             # msg.sender should not be empty
             # msg.data should not be empty
             # msg.signature should not be empty
             return None
+        # OK
         return NetworkMessage(msg=msg)

@@ -87,7 +87,7 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
         return cls.match_sign_key(sign_key=a, verify_key=b.public_key)
 
 
-def crypto_helper():
+def crypto_helper() -> GeneralCryptoHelper:
     helper = shared_crypto_extensions.helper
     assert isinstance(helper, GeneralCryptoHelper), 'crypto helper error: %s' % helper
     return helper

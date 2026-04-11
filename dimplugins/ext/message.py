@@ -38,12 +38,12 @@ from dimp import InstantMessage, InstantMessageFactory
 from dimp import SecureMessage, SecureMessageFactory
 from dimp import ReliableMessage, ReliableMessageFactory
 
-from dimp.ext import GeneralMessageHelper
-from dimp.ext import ContentHelper
-from dimp.ext import EnvelopeHelper
-from dimp.ext import InstantMessageHelper
-from dimp.ext import SecureMessageHelper
-from dimp.ext import ReliableMessageHelper
+from dimp import GeneralMessageHelper
+from dimp import ContentHelper
+from dimp import EnvelopeHelper
+from dimp import InstantMessageHelper
+from dimp import SecureMessageHelper
+from dimp import ReliableMessageHelper
 
 
 class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,

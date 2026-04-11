@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-#
-#   DIM-SDK : Decentralized Instant Messaging Software Development Kit
-#
-#                                Written in 2019 by Moky <albert.moky@gmail.com>
-#
 # ==============================================================================
 # MIT License
 #
@@ -36,6 +31,8 @@
 
 from dimp.ext import *
 
+from .mem import *
+
 from .crypto import *
 from .format import *
 
@@ -43,38 +40,55 @@ from .mkm import *
 from .dkd import *
 from .ext import *
 
-from .ext_loader import ContentParser, CommandParser
+from .ext_msg import ContentParser, CommandParser
 from .ext_loader import ExtensionLoader
 from .plugin_loader import PluginLoader
 
 
+name = "DIMPlugins"
+
+__author__ = 'Albert Moky'
+
 __all__ = [
 
-    'SymmetricKeyHelper', 'PublicKeyHelper', 'PrivateKeyHelper',
-    # 'CryptoExtensions',
-    'GeneralCryptoHelper', 'SharedCryptoExtensions',
+    'TransportableDataHelper',
+    'FormatExtensions', 'shared_format_extensions',
 
-    'TransportableDataHelper', 'PortableNetworkFileHelper',
-    # 'FormatExtensions',
-    'GeneralFormatHelper', 'SharedFormatExtensions',
+    'SymmetricKeyHelper', 'PublicKeyHelper', 'PrivateKeyHelper',
+    'CryptoExtensions', 'shared_crypto_extensions',
 
     'AddressHelper', 'IDHelper',
     'MetaHelper', 'DocumentHelper',
-    # 'AccountExtensions',
-    'GeneralAccountHelper', 'SharedAccountExtensions',
+    'AccountExtensions', 'shared_account_extensions',
+
+    'GeneralCryptoHelper',
+    'GeneralAccountHelper',
 
     'ContentHelper', 'EnvelopeHelper',
     'InstantMessageHelper', 'SecureMessageHelper', 'ReliableMessageHelper',
-    # 'MessageExtensions',
-    'GeneralMessageHelper', 'SharedMessageExtensions',
+    'MessageExtensions', 'shared_message_extensions',
 
-    'CommandHelper',
-    # 'CommandExtensions',
-    'GeneralCommandHelper', 'SharedCommandExtensions',
+    'GeneralMessageHelper',
+
+    'TransportableFileHelper',
+
+    'CommandHelper', 'GeneralCommandHelper',
+    'QuoteHelper', 'QuotePurifier',
+
+    #
+    #   Memory Cache
+    #
+
+    'MemoryCache',
+    'ThanosCache',
 
     #
     #   Crypto
     #
+
+    'BaseKey',
+    'BaseSymmetricKey', 'BaseAsymmetricKey',
+    'BasePublicKey', 'BasePrivateKey',
 
     'PlainKey', 'PlainKeyFactory',
     'AESKey', 'AESKeyFactory',
@@ -90,6 +104,7 @@ __all__ = [
     #
 
     'SHA256Digester', 'KECCAK256Digester', 'RIPEMD160Digester',
+    # 'DigestMixIn',
 
     #
     #   Format
@@ -97,9 +112,10 @@ __all__ = [
 
     'Base64Coder', 'Base58Coder', 'HexCoder',
     'JSONCoder', 'UTF8Coder',
+    # 'CoderMixIn',
 
-    'Base64Data', 'Base64DataFactory',
-    'BaseNetworkFile', 'BaseNetworkFileFactory',
+    'BaseNetworkDataFactory', 'BaseNetworkFileFactory',
+    # 'TransportableMixIn',
 
     #
     #   MingKeMing

@@ -223,9 +223,9 @@ class ECCPrivateKey(BasePrivateKey):
 class ECCPublicKeyFactory(PublicKeyFactory):
 
     # Override
-    def parse_public_key(self, key: dict) -> Optional[PublicKey]:
+    def parse_public_key(self, key: Dict) -> Optional[PublicKey]:
         # check 'data'
-        if key.get('data') is None:
+        if 'data' not in key:
             # key.data should not be empty
             return None
         # OK
@@ -239,9 +239,9 @@ class ECCPrivateKeyFactory(PrivateKeyFactory):
         return ECCPrivateKey.new_key()
 
     # Override
-    def parse_private_key(self, key: dict) -> Optional[PrivateKey]:
+    def parse_private_key(self, key: Dict) -> Optional[PrivateKey]:
         # check 'data'
-        if key.get('data') is None:
+        if 'data' not in key:
             # key.data should not be empty
             return None
         # OK

@@ -207,9 +207,9 @@ class AESKeyFactory(SymmetricKeyFactory):
         return AESKey.new_key()
 
     # Override
-    def parse_symmetric_key(self, key: dict) -> Optional[SymmetricKey]:
+    def parse_symmetric_key(self, key: Dict) -> Optional[SymmetricKey]:
         # check 'data'
-        if key.get('data') is None:
+        if 'data' not in key:
             # key.data should not be empty
             return None
         # OK
