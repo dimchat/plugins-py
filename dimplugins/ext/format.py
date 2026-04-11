@@ -23,117 +23,36 @@
 # SOFTWARE.
 # ==============================================================================
 
-from typing import Optional, Any, List, Dict
+from typing import Optional, Any, Dict
 
-from dimp import URI, Converter, Mapper
+from dimp import URI, Mapper, Wrapper
 from dimp import DecryptKey
 from dimp import JSONMap
-from dimp import EncodeAlgorithms
-from dimp import TransportableData
-from dimp import PortableNetworkFile
-from dimp import TransportableDataFactory
-from dimp import PortableNetworkFileFactory
-
-from dimp.ext import GeneralFormatHelper
-from dimp.ext import PortableNetworkFileHelper
-from dimp.ext import TransportableDataHelper
+from dimp import DataURI
+from dimp import TransportableData, TransportableDataFactory
+from dimp import TransportableFile, TransportableFileFactory
+from dimp import TransportableDataHelper
+from dimp import TransportableFileHelper
 
 
-class FormatGeneralFactory(GeneralFormatHelper, PortableNetworkFileHelper, TransportableDataHelper):
+class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
 
     def __init__(self):
         super().__init__()
-        self.__pnf_factory: Optional[PortableNetworkFileFactory] = None
-        # str(algorithm) => TransportableData.Factory
-        self.__ted_factories: Dict[str, TransportableDataFactory] = {}
-
-    # noinspection PyMethodMayBeStatic
-    def split(self, text: str) -> List[str]:
-        """
-        Split text string to array: ["{TEXT}", "{algorithm}", "{content-type}"]
-
-        :param text: '{TEXT}', or
-                     'base64,{BASE64_ENCODE}', or
-                     'data:image/png;base64,{BASE64_ENCODE}'
-        :return: text + algorithm
-        """
-        pos1 = text.find('://')
-        if pos1 > 0:
-            # [URL]
-            return [text]
-        else:
-            # skip 'data:'
-            pos1 = text.find(':') + 1
-        array = []
-        # seeking for 'content-type'
-        pos2 = text.find(';', pos1)
-        if pos2 > pos1:
-            array.append(text[pos1:pos2])
-            pos1 = pos2 + 1
-        # seeking for 'algorithm'
-        pos2 = text.find(',', pos1)
-        if pos2 > pos1:
-            array.insert(0, text[pos1:pos2])
-            pos1 = pos2 + 1
-        # OK
-        if pos1 == 0:
-            # [data]
-            array.insert(0, text)
-        else:
-            # [data, algorithm, type]
-            array.insert(0, text[pos1:])
-        return array
-
-    def decode(self, data: Any, default_key: str) -> Optional[Dict]:
-        if isinstance(data, Mapper):
-            return data.dictionary
-        elif isinstance(data, Dict):
-            return data
-        text = data if isinstance(data, str) else str(data)
-        if len(text) == 0:
-            return None
-        elif text.startswith('{') and text.endswith('}'):
-            return JSONMap.decode(string=text)
-        info = {}
-        array = self.split(text=text)
-        size = len(array)
-        if size == 1:
-            info[default_key] = array[0]
-        else:
-            assert size > 1, 'split error: %s => %s' % (text, array)
-            info['data'] = array[0]
-            info['algorithm'] = array[1]
-            if size > 2:
-                # 'data:...;...,...'
-                info['content-type'] = array[2]
-                if text.startswith('data:'):
-                    info['URL'] = text
-        return info
-
-    # Override
-    def get_format_algorithm(self, ted: Dict, default: Optional[str] = None) -> Optional[str]:
-        value = ted.get('algorithm')
-        return Converter.get_str(value=value, default=default)
+        self.__ted_factory: Optional[TransportableDataFactory] = None
+        self.__pnf_factory: Optional[TransportableFileFactory] = None
 
     #
     #   TED - Transportable Encoded Data
     #
 
     # Override
-    def set_transportable_data_factory(self, algorithm: str, factory: TransportableDataFactory):
-        self.__ted_factories[algorithm] = factory
+    def set_transportable_data_factory(self, factory: TransportableDataFactory):
+        self.__ted_factory = factory
 
     # Override
-    def get_transportable_data_factory(self, algorithm: str) -> Optional[TransportableDataFactory]:
-        return self.__ted_factories.get(algorithm)
-
-    # Override
-    def create_transportable_data(self, algorithm: str, data: bytes) -> TransportableData:
-        if algorithm is None:  # or len(algorithm) == 0:
-            algorithm = EncodeAlgorithms.DEFAULT
-        factory = self.get_transportable_data_factory(algorithm=algorithm)
-        assert factory is not None, 'data algorithm not support: %s' % algorithm
-        return factory.create_transportable_data(data=data)
+    def get_transportable_data_factory(self) -> Optional[TransportableDataFactory]:
+        return self.__ted_factory
 
     # Override
     def parse_transportable_data(self, ted: Any) -> Optional[TransportableData]:
@@ -142,51 +61,78 @@ class FormatGeneralFactory(GeneralFormatHelper, PortableNetworkFileHelper, Trans
         elif isinstance(ted, TransportableData):
             return ted
         # unwrap
-        info = self.decode(data=ted, default_key='data')
-        if info is None:
+        string = Wrapper.get_str(ted)
+        if string is None:
             # assert False, 'TED error: %s' % ted
             return None
-        alg = self.get_format_algorithm(info)
-        # assert alg is not None, 'TED error: %s' % key
-        factory = None if alg is None else self.get_transportable_data_factory(algorithm=alg)
-        if factory is None:
-            # unknown algorithm, get default factory
-            factory = self.get_transportable_data_factory(algorithm='*')  # unknown
-            if factory is None:
-                # assert False, 'default TED factory not found: %s' % ted
-                return None
-        return factory.parse_transportable_data(info)
+        factory = self.get_transportable_data_factory()
+        assert factory is not None, 'TED factory not set'
+        return factory.parse_transportable_data(string)
 
     #
     #   PNF - Portable Network File
     #
 
     # Override
-    def set_portable_network_file_factory(self, factory: PortableNetworkFileFactory):
+    def set_transportable_file_factory(self, factory: TransportableFileFactory):
         self.__pnf_factory = factory
 
     # Override
-    def get_portable_network_file_factory(self) -> Optional[PortableNetworkFileFactory]:
+    def get_transportable_file_factory(self) -> Optional[TransportableFileFactory]:
         return self.__pnf_factory
 
     # Override
-    def create_portable_network_file(self, data: Optional[TransportableData], filename: Optional[str],
-                                     url: Optional[URI], password: Optional[DecryptKey]) -> PortableNetworkFile:
-        factory = self.get_portable_network_file_factory()
+    def create_transportable_file(self, data: Optional[TransportableData], filename: Optional[str],
+                                  url: Optional[URI], password: Optional[DecryptKey]) -> TransportableFile:
+        factory = self.get_transportable_file_factory()
         assert factory is not None, 'PNF factory not ready'
-        return factory.create_portable_network_file(data=data, filename=filename, url=url, password=password)
+        return factory.create_transportable_file(data=data, filename=filename, url=url, password=password)
 
     # Override
-    def parse_portable_network_file(self, pnf: Any) -> Optional[PortableNetworkFile]:
+    def parse_transportable_file(self, pnf: Any) -> Optional[TransportableFile]:
         if pnf is None:
             return None
-        elif isinstance(pnf, PortableNetworkFile):
+        elif isinstance(pnf, TransportableFile):
             return pnf
         # unwrap
-        info = self.decode(data=pnf, default_key='URL')
+        info = self._get_transportable_file_content(pnf)
         if info is None:
             # assert False, 'PNF error: %s' % pnf
             return None
-        factory = self.get_portable_network_file_factory()
+        factory = self.get_transportable_file_factory()
         assert factory is not None, 'PNF factory not ready'
-        return factory.parse_portable_network_file(info)
+        return factory.parse_transportable_file(info)
+
+    # noinspection PyMethodMayBeStatic
+    def _get_transportable_file_content(self, pnf: Any) -> Optional[Dict]:
+        if isinstance(pnf, Mapper):
+            return pnf.dictionary
+        elif isinstance(pnf, Dict):
+            return pnf
+        text = Wrapper.get_str(pnf)
+        if text is None or len(text) < 8:
+            # assert False, 'PNF error: %s' % pnf
+            return None
+        elif text.startswith('{'):
+            # decode JSON string
+            assert text.endswith('}'), 'PNF json error: %s' % pnf
+            return JSONMap.decode(string=text)
+        content = {}
+        # 1. check for URL: 'http://...'
+        pos = text.find('://')
+        if 0 < pos < 8:
+            content['URL'] = text
+            return content
+        content['data'] = text
+        # 2. check for data URI: 'data:image/jpeg;base64,...'
+        uri = DataURI.parse(text)
+        if uri is not None:
+            extra = uri.parameters
+            if extra is not None:
+                filename = extra.get('filename')
+                if filename is not None:
+                    content['filename'] = filename
+        # else:
+        #     # 3. check for Base-64 encoded string?
+        #     pass
+        return content

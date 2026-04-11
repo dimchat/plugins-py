@@ -32,9 +32,10 @@ from typing import Optional, Any, Dict
 
 from dimp import Wrapper, Converter
 from dimp import Command, CommandFactory
-
-from dimp.ext import GeneralCommandHelper, CommandHelper
-from dimp.ext import SharedMessageExtensions
+from dimp import ContentFactory
+from dimp import ContentHelper
+from dimp import GeneralCommandHelper, CommandHelper
+from dimp import GeneralMessageHelper, shared_message_extensions
 
 
 class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
@@ -84,10 +85,22 @@ class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
 
 
 def default_factory(info: Dict) -> Optional[CommandFactory]:
-    ext = SharedMessageExtensions()
-    msg_type = ext.helper.get_content_type(content=info)
+    """ get factory by content type """
+    msg_type = get_content_type(content=info)
     if msg_type is not None:
-        fact = ext.content_helper.get_content_factory(msg_type)
+        fact = get_content_factory(msg_type)
         if isinstance(fact, CommandFactory):
             return fact
     assert False, 'cannot parse command: %s' % info
+
+
+def get_content_type(content: Dict, default: Optional[str] = None) -> Optional[str]:
+    helper = shared_message_extensions.helper
+    assert isinstance(helper, GeneralMessageHelper), 'message helper error: %s' % helper
+    return helper.get_content_type(content=content, default=default)
+
+
+def get_content_factory(msg_type: str) -> Optional[ContentFactory]:
+    helper = shared_message_extensions.content_helper
+    assert isinstance(helper, ContentHelper), 'content helper error: %s' % helper
+    return helper.get_content_factory(msg_type)

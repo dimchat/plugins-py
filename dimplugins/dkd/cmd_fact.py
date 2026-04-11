@@ -33,7 +33,7 @@ from typing import Optional, Dict
 from dimp import Content, ContentFactory
 from dimp import Command, CommandFactory
 from dimp import BaseCommand, BaseHistoryCommand, BaseGroupCommand
-from dimp.ext import SharedCommandExtensions
+from dimp import CommandHelper, GeneralCommandHelper, shared_message_extensions
 
 
 """
@@ -46,14 +46,13 @@ class GeneralCommandFactory(ContentFactory, CommandFactory):
 
     # Override
     def parse_content(self, content: Dict) -> Optional[Content]:
-        ext = SharedCommandExtensions()
         # get factory by command name
-        cmd = ext.helper.get_cmd(content=content)
-        factory = None if cmd is None else ext.cmd_helper.get_command_factory(cmd=cmd)
+        cmd = get_cmd(content=content)
+        factory = None if cmd is None else get_command_factory(cmd=cmd)
         if factory is None:
             # check for group command
             if 'group' in content:  # and cmd != 'group':
-                factory = ext.cmd_helper.get_command_factory(cmd='group')
+                factory = get_command_factory(cmd='group')
             if factory is None:
                 factory = self
         return factory.parse_command(content=content)
@@ -61,10 +60,11 @@ class GeneralCommandFactory(ContentFactory, CommandFactory):
     # Override
     def parse_command(self, content: Dict) -> Optional[Command]:
         # check 'sn', 'command'
-        if content.get('sn') is None or content.get('command') is None:
+        if 'sn' not in content or 'command' not in content:
             # content.sn should not be empty
             # content.command should not be empty
             return None
+        # OK
         return BaseCommand(content=content)
 
 
@@ -73,11 +73,12 @@ class HistoryCommandFactory(GeneralCommandFactory):
     # Override
     def parse_command(self, content: Dict) -> Optional[Command]:
         # check 'sn', 'command', 'time'
-        if content.get('sn') is None or content.get('command') is None or content.get('time') is None:
+        if 'sn' not in content or 'command' not in content or 'time' not in content:
             # content.sn should not be empty
             # content.command should not be empty
             # content.time should not be empty
             return None
+        #  OK
         return BaseHistoryCommand(content=content)
 
 
@@ -85,10 +86,9 @@ class GroupCommandFactory(HistoryCommandFactory):
 
     # Override
     def parse_content(self, content: Dict) -> Optional[Content]:
-        ext = SharedCommandExtensions()
         # get factory by command name
-        cmd = ext.helper.get_cmd(content=content)
-        factory = cmd if cmd is None else ext.cmd_helper.get_command_factory(cmd=cmd)
+        cmd = get_cmd(content=content)
+        factory = cmd if cmd is None else get_command_factory(cmd=cmd)
         if factory is None:
             factory = self
         return factory.parse_command(content=content)
@@ -96,9 +96,22 @@ class GroupCommandFactory(HistoryCommandFactory):
     # Override
     def parse_command(self, content: Dict) -> Optional[Command]:
         # check 'sn', 'command', 'group
-        if content.get('sn') is None or content.get('command') is None or content.get('group') is None:
+        if 'sn' not in content or 'command' not in content or 'group' not in content:
             # content.sn should not be empty
             # content.command should not be empty
             # content.group should not be empty
             return None
+        #  OK
         return BaseGroupCommand(content=content)
+
+
+def get_cmd(content: Dict, default: Optional[str] = None) -> Optional[str]:
+    helper = shared_message_extensions.cmd_helper
+    assert isinstance(helper, GeneralCommandHelper), 'command helper error: %s' % helper
+    return helper.get_cmd(content=content, default=default)
+
+
+def get_command_factory(cmd: str) -> Optional[CommandFactory]:
+    helper = shared_message_extensions.command_helper
+    assert isinstance(helper, CommandHelper), 'command helper error: %s' % helper
+    return helper.get_command_factory(cmd=cmd)

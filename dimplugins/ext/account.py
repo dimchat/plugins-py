@@ -40,9 +40,9 @@ from dimp import Meta, MetaFactory
 from dimp import Document, DocumentFactory
 from dimp import DocumentType
 
-from dimp.ext import AddressHelper, IDHelper
-from dimp.ext import MetaHelper, DocumentHelper
-from dimp.ext import GeneralAccountHelper
+from dimp import AddressHelper, IDHelper
+from dimp import MetaHelper, DocumentHelper
+from dimp import GeneralAccountHelper
 
 
 class AccountGeneralFactory(GeneralAccountHelper,
@@ -75,16 +75,21 @@ class AccountGeneralFactory(GeneralAccountHelper,
         elif default is not None:
             return default
         # get type for did
-        identifier = ID.parse(identifier=document.get('did'))
-        if identifier is None:
+        did = self.get_document_id(document=document)
+        if did is None:
             assert False, 'document error: %s' % document
             # return None
-        elif identifier.is_user:
+        elif did.is_user:
             return DocumentType.VISA
-        elif identifier.is_group:
+        elif did.is_group:
             return DocumentType.BULLETIN
         else:
             return DocumentType.PROFILE
+
+    # Override
+    def get_document_id(self, document: Dict) -> Optional[ID]:
+        did = document.get('did')
+        return ID.parse(identifier=did)
 
     #
     #   Address
@@ -169,8 +174,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
         return self.__meta_factories.get(version)
 
     # Override
-    def generate_meta(self, version: str, private_key: SignKey,
-                      seed: Optional[str]) -> Meta:
+    def generate_meta(self, version: str, private_key: SignKey, seed: Optional[str]) -> Meta:
         factory = self.get_meta_factory(version)
         assert factory is not None, 'failed to get meta factory: %s' % version
         return factory.generate_meta(private_key, seed=seed)
@@ -216,11 +220,10 @@ class AccountGeneralFactory(GeneralAccountHelper,
         return self.__docs_factories.get(doc_type)
 
     # Override
-    def create_document(self, doc_type: str, identifier: ID,
-                        data: Optional[str], signature: Optional[TransportableData]) -> Document:
+    def create_document(self, doc_type: str, data: Optional[str], signature: Optional[TransportableData]) -> Document:
         factory = self.get_document_factory(doc_type)
         assert factory is not None, 'document factory not found for type: %s' % doc_type
-        return factory.create_document(identifier, data=data, signature=signature)
+        return factory.create_document(data=data, signature=signature)
 
     # Override
     def parse_document(self, document: Any) -> Optional[Document]:
