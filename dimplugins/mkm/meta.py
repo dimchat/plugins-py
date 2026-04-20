@@ -81,7 +81,7 @@ class DefaultMeta(BaseMeta):
         if cached is None:
             # generate and cache it
             ted = self.fingerprint
-            data = ted.binary
+            data = ted.to_bytes()
             cached = BTCAddress.from_data(data, network=network)
             self.__addresses[network] = cached
         return cached
@@ -125,7 +125,7 @@ class BTCMeta(BaseMeta):
             # TODO: compress public key?
             key = self.public_key
             ted = key.data
-            data = ted.binary
+            data = ted.to_bytes()
             # generate and cache it
             cached = BTCAddress.from_data(data, network=network)
             self.__addresses[network] = cached
@@ -169,7 +169,7 @@ class ETHMeta(BaseMeta):
             # 64 bytes key data without prefix 0x04
             key = self.public_key
             ted = key.data
-            data = ted.binary
+            data = ted.to_bytes()
             # generate and cache it
             cached = ETHAddress.from_data(data)
             self.__address = cached
@@ -208,7 +208,7 @@ class BaseMetaFactory(MetaFactory):
             out = ETHMeta(version=version, public_key=public_key)
         else:
             raise TypeError('unknown meta type: %s' % version)
-        assert out.valid, 'meta error: %s' % out
+        assert out.is_valid, 'meta error: %s' % out
         return out
 
     # Override
@@ -233,7 +233,7 @@ class BaseMetaFactory(MetaFactory):
             out = ETHMeta(meta=meta)
         else:
             raise TypeError('unknown meta type: %s' % version)
-        if out.valid:
+        if out.is_valid:
             return out
         # assert False, 'meta error: %s' % meta
 

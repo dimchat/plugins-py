@@ -106,7 +106,7 @@ class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
     # noinspection PyMethodMayBeStatic
     def _get_transportable_file_content(self, pnf: Any) -> Optional[Dict]:
         if isinstance(pnf, Mapper):
-            return pnf.dictionary
+            return pnf.to_dict()
         elif isinstance(pnf, Dict):
             return pnf
         text = Wrapper.get_str(pnf)

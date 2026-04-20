@@ -46,7 +46,8 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
 
     @property  # Override
     def algorithm(self) -> str:
-        return BaseKey.get_key_algorithm(key=self.dictionary)
+        info = self.to_dict()
+        return BaseKey.get_key_algorithm(key=info)
 
     #
     #   Conveniences
@@ -108,8 +109,8 @@ class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
             elif isinstance(other, SymmetricKey):
                 return BaseKey.symmetric_keys_equal(other, self)
             # compare with inner map
-            other = other.dictionary
-        return self.dictionary.__eq__(other)
+            other = other.to_dict()
+        return self.to_dict().__eq__(other)
 
     # Override
     def __ne__(self, other) -> bool:
@@ -120,12 +121,13 @@ class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
             elif isinstance(other, SymmetricKey):
                 return not BaseKey.symmetric_keys_equal(other, self)
             # compare with inner map
-            other = other.dictionary
-        return self.dictionary.__ne__(other)
+            other = other.to_dict()
+        return self.to_dict().__ne__(other)
 
     @property  # Override
     def algorithm(self) -> str:
-        return BaseKey.get_key_algorithm(key=self.dictionary)
+        info = self.to_dict()
+        return BaseKey.get_key_algorithm(key=info)
 
     # Override
     def match_encrypt_key(self, key: EncryptKey) -> bool:
@@ -140,7 +142,8 @@ class BaseAsymmetricKey(Dictionary, AsymmetricKey, ABC):
 
     @property  # Override
     def algorithm(self) -> str:
-        return BaseKey.get_key_algorithm(key=self.dictionary)
+        info = self.to_dict()
+        return BaseKey.get_key_algorithm(key=info)
 
 
 # noinspection PyAbstractClass
@@ -151,7 +154,8 @@ class BasePublicKey(Dictionary, PublicKey, ABC):
 
     @property  # Override
     def algorithm(self) -> str:
-        return BaseKey.get_key_algorithm(key=self.dictionary)
+        info = self.to_dict()
+        return BaseKey.get_key_algorithm(key=info)
 
     # Override
     def match_sign_key(self, key: SignKey) -> bool:
@@ -173,8 +177,8 @@ class BasePrivateKey(Dictionary, PrivateKey, ABC):
             elif isinstance(other, PrivateKey):
                 return BaseKey.private_keys_equal(other, self)
             # compare with inner map
-            other = other.dictionary
-        return self.dictionary.__eq__(other)
+            other = other.to_dict()
+        return self.to_dict().__eq__(other)
 
     # Override
     def __ne__(self, other) -> bool:
@@ -185,9 +189,10 @@ class BasePrivateKey(Dictionary, PrivateKey, ABC):
             elif isinstance(other, PrivateKey):
                 return not BaseKey.private_keys_equal(other, self)
             # compare with inner map
-            other = other.dictionary
-        return self.dictionary.__ne__(other)
+            other = other.to_dict()
+        return self.to_dict().__ne__(other)
 
     @property  # Override
     def algorithm(self) -> str:
-        return BaseKey.get_key_algorithm(key=self.dictionary)
+        info = self.to_dict()
+        return BaseKey.get_key_algorithm(key=info)

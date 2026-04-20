@@ -124,12 +124,12 @@ class AESKey(BaseSymmetricKey):
         # decode IV data
         ted = TransportableData.parse(base64)
         if ted is not None:
-            iv = ted.data
+            iv = ted.to_bytes()
             if iv is not None:
                 return iv
         assert base64 is None, 'IV data error: %s' % base64
 
-    def _zero_init_vector(self):
+    def _zero_init_vector(self) -> bytes:
         # zero IV:
         #           b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0'
         return self.block_size * chr(0).encode('utf-8')
@@ -142,7 +142,7 @@ class AESKey(BaseSymmetricKey):
             assert False, 'extra dict must provided to store IV for AES'
         else:
             ted = Base64Data.create(binary=iv)
-            extra['IV'] = ted.object
+            extra['IV'] = ted.serialize()
         # OK
         return iv
 
@@ -154,7 +154,7 @@ class AESKey(BaseSymmetricKey):
             key_iv = self._new_init_vector(extra=extra)
         # 2. get key data
         key_data = self.data
-        buffer = key_data.binary
+        buffer = key_data.to_bytes()
         # 3. try to encrypt
         data = pkcs7_pad(data=plaintext, block_size=AES.block_size)
         key = AES.new(buffer, AES.MODE_CBC, key_iv)
@@ -168,7 +168,7 @@ class AESKey(BaseSymmetricKey):
             key_iv = self._zero_init_vector()
         # 2. get key data
         key_data = self.data
-        buffer = key_data.binary
+        buffer = key_data.to_bytes()
         # 3. try to decrypt
         try:
             key = AES.new(buffer, AES.MODE_CBC, key_iv)

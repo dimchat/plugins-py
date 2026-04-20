@@ -54,7 +54,7 @@ class GeneralDocumentFactory(DocumentFactory):
             assert signature is None, 'document error: %s, signature: %s' % (data, signature)
             # 1. create empty document
             return self._create_empty_document()
-        elif signature is None or signature.empty:
+        elif signature is None or signature.is_empty:
             # assert False, 'document error: %s, signature: %s' % (data, signature)
             return self._create_empty_document()
         # 2. create document with data & signature from local storage
