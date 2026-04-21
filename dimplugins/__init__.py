@@ -82,6 +82,8 @@ __all__ = [
     'MemoryCache',
     'ThanosCache',
 
+    'MemoryCacheExtension',
+
     #
     #   Crypto
     #

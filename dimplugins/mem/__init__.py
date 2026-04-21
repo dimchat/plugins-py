@@ -25,10 +25,14 @@
 
 from .cache import MemoryCache, ThanosCache
 
+from .ext import MemoryCacheExtension
+
 
 __all__ = [
 
     'MemoryCache',
     'ThanosCache',
+
+    'MemoryCacheExtension',
 
 ]

@@ -38,7 +38,8 @@ from dimp import EntityType, Address
 from dimp import MetaType
 from dimp import Meta, MetaFactory
 from dimp import BaseMeta
-from dimp import GeneralAccountHelper, shared_account_extensions
+
+from ..mem.ext import account_helper
 
 from .btc import BTCAddress
 from .eth import ETHAddress
@@ -236,9 +237,3 @@ class BaseMetaFactory(MetaFactory):
         if out.is_valid:
             return out
         # assert False, 'meta error: %s' % meta
-
-
-def account_helper() -> GeneralAccountHelper:
-    helper = shared_account_extensions.helper
-    assert isinstance(helper, GeneralAccountHelper), 'account helper error: %s' % helper
-    return helper

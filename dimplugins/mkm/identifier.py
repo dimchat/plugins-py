@@ -33,9 +33,8 @@ from typing import Optional
 from dimp import ID, IDFactory, Identifier
 from dimp import Address
 from dimp import Meta
-from dimp import AccountExtensions, shared_account_extensions
 
-from ..mem import MemoryCache, ThanosCache
+from ..mem.ext import id_cache
 
 
 class GeneralIdentifierFactory(IDFactory):
@@ -102,29 +101,3 @@ class GeneralIdentifierFactory(IDFactory):
             return self._new_id(identifier=identifier, name=name, address=address, terminal=terminal)
         else:
             assert False, 'ID error: %s' % identifier
-
-
-def id_cache() -> MemoryCache[str, ID]:
-    cache = shared_account_extensions.id_cache
-    assert isinstance(cache, MemoryCache), 'ID cache error: %s' % cache
-    return cache
-
-
-# -----------------------------------------------------------------------------
-#  Memory Cache Extensions
-# -----------------------------------------------------------------------------
-
-
-class _IdCacheExt:
-    _id_cache: MemoryCache[str, ID] = ThanosCache()
-
-    @property
-    def id_cache(self) -> MemoryCache[str, ID]:
-        return _IdCacheExt._id_cache
-
-    @id_cache.setter
-    def id_cache(self, cache: MemoryCache):
-        _IdCacheExt._id_cache = cache
-
-
-AccountExtensions.id_cache = _IdCacheExt.id_cache

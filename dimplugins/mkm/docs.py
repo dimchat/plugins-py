@@ -34,7 +34,8 @@ from dimp import TransportableData
 from dimp import DocumentType
 from dimp import Document, DocumentFactory
 from dimp import BaseDocument, BaseVisa, BaseBulletin
-from dimp import GeneralAccountHelper, shared_account_extensions
+
+from ..mem.ext import account_helper
 
 
 class GeneralDocumentFactory(DocumentFactory):
@@ -99,9 +100,3 @@ class GeneralDocumentFactory(DocumentFactory):
             return BaseBulletin(document=document)
         else:
             return BaseDocument(document=document)
-
-
-def account_helper() -> GeneralAccountHelper:
-    helper = shared_account_extensions.helper
-    assert isinstance(helper, GeneralAccountHelper), 'account helper error: %s' % helper
-    return helper

@@ -34,9 +34,8 @@ from typing import Optional
 from dimp import Address, AddressFactory
 from dimp import ANYWHERE, EVERYWHERE
 from dimp import Meta
-from dimp import AccountExtensions, shared_account_extensions
 
-from ..mem import MemoryCache, ThanosCache
+from ..mem.ext import address_cache
 
 from .btc import BTCAddress
 from .eth import ETHAddress
@@ -90,29 +89,3 @@ class BaseAddressFactory(AddressFactory, ABC):
         # TODO: other types of address
         assert res is not None, 'invalid address: %s' % address
         return res
-
-
-def address_cache() -> MemoryCache[str, Address]:
-    cache = shared_account_extensions.address_cache
-    assert isinstance(cache, MemoryCache), 'address cache error: %s' % cache
-    return cache
-
-
-# -----------------------------------------------------------------------------
-#  Memory Cache Extensions
-# -----------------------------------------------------------------------------
-
-
-class _AddressCacheExt:
-    _address_cache: MemoryCache[str, Address] = ThanosCache()
-
-    @property
-    def address_cache(self) -> MemoryCache[str, Address]:
-        return _AddressCacheExt._address_cache
-
-    @address_cache.setter
-    def address_cache(self, cache: MemoryCache):
-        _AddressCacheExt._address_cache = cache
-
-
-AccountExtensions.address_cache = _AddressCacheExt.address_cache
