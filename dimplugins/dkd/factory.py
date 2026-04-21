@@ -111,7 +111,7 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
             # msg.data should not be empty
             return None
         # check 'signature'
-        if 'signature' not in msg:
+        if 'signature' in msg:
             return NetworkMessage(msg=msg)
         # OK
         return EncryptedMessage(msg=msg)

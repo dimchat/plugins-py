@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#   DIMP : Decentralized Instant Messaging Protocol
+#   Dao-Ke-Dao: Universal Message Module
 #
 #                                Written in 2022 by Moky <albert.moky@gmail.com>
 #
@@ -28,14 +28,13 @@
 # SOFTWARE.
 # ==============================================================================
 
-from typing import Optional, Any, Dict
+from typing import Optional, Union, Any, Dict
 
 from dimp import Wrapper, Converter
 from dimp import Command, CommandFactory
 from dimp import ContentFactory
-from dimp import ContentHelper
-from dimp import GeneralCommandHelper, CommandHelper
-from dimp import GeneralMessageHelper, shared_message_extensions
+from dimp import CommandHelper, GeneralCommandHelper
+from dimp import ContentExtension, GeneralMessageExtension, shared_message_extensions
 
 
 class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
@@ -95,12 +94,16 @@ def default_factory(info: Dict) -> Optional[CommandFactory]:
 
 
 def get_content_type(content: Dict, default: Optional[str] = None) -> Optional[str]:
-    helper = shared_message_extensions.helper
-    assert isinstance(helper, GeneralMessageHelper), 'message helper error: %s' % helper
+    ext = message_extensions()
+    helper = ext.helper
     return helper.get_content_type(content=content, default=default)
 
 
 def get_content_factory(msg_type: str) -> Optional[ContentFactory]:
-    helper = shared_message_extensions.content_helper
-    assert isinstance(helper, ContentHelper), 'content helper error: %s' % helper
+    ext = message_extensions()
+    helper = ext.content_helper
     return helper.get_content_factory(msg_type)
+
+
+def message_extensions() -> Union[ContentExtension, GeneralMessageExtension]:
+    return shared_message_extensions

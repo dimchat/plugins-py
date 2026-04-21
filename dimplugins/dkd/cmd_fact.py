@@ -28,12 +28,12 @@
 # SOFTWARE.
 # ==============================================================================
 
-from typing import Optional, Dict
+from typing import Optional, Union, Dict
 
 from dimp import Content, ContentFactory
 from dimp import Command, CommandFactory
 from dimp import BaseCommand, BaseHistoryCommand, BaseGroupCommand
-from dimp import CommandHelper, GeneralCommandHelper, shared_message_extensions
+from dimp import CommandExtension, CmdExtension, shared_message_extensions
 
 
 """
@@ -106,12 +106,16 @@ class GroupCommandFactory(HistoryCommandFactory):
 
 
 def get_cmd(content: Dict, default: Optional[str] = None) -> Optional[str]:
-    helper = shared_message_extensions.cmd_helper
-    assert isinstance(helper, GeneralCommandHelper), 'command helper error: %s' % helper
+    ext = command_extensions()
+    helper = ext.cmd_helper
     return helper.get_cmd(content=content, default=default)
 
 
 def get_command_factory(cmd: str) -> Optional[CommandFactory]:
-    helper = shared_message_extensions.command_helper
-    assert isinstance(helper, CommandHelper), 'command helper error: %s' % helper
+    ext = command_extensions()
+    helper = ext.command_helper
     return helper.get_command_factory(cmd=cmd)
+
+
+def command_extensions() -> Union[CommandExtension, CmdExtension]:
+    return shared_message_extensions

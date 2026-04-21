@@ -23,9 +23,22 @@
 # SOFTWARE.
 # ==============================================================================
 
-from dimp import shared_crypto_extensions, shared_format_extensions
-from dimp import shared_account_extensions
-from dimp import shared_message_extensions
+from typing import Union
+
+from dimp import SymmetricKeyExtension, PublicKeyExtension, PrivateKeyExtension
+from dimp import GeneralCryptoExtension, shared_crypto_extensions
+
+from dimp import TransportableFileExtension
+from dimp import FormatExtensions, shared_format_extensions
+
+from dimp import AddressExtension, IDExtension, MetaExtension, DocumentExtension
+from dimp import GeneralAccountExtension, shared_account_extensions
+
+from dimp import MessageExtensions, ContentExtension
+from dimp import InstantMessageExtension, SecureMessageExtension, ReliableMessageExtension
+from dimp import GeneralMessageExtension, shared_message_extensions
+
+from dimp import CommandExtension, CmdExtension
 
 from .ext import CryptographyKeyGeneralFactory, FormatGeneralFactory
 from .ext import AccountGeneralFactory
@@ -40,42 +53,71 @@ class CoreMixIn:
     def register_crypto_helpers(self):
         # crypto
         helper = CryptographyKeyGeneralFactory()
-        shared_crypto_extensions.symmetric_helper = helper
-        shared_crypto_extensions.private_helper = helper
-        shared_crypto_extensions.public_helper = helper
-        shared_crypto_extensions.helper = helper
+        ext = crypto_extensions()
+        ext.symmetric_helper = helper
+        ext.private_helper = helper
+        ext.public_helper = helper
+        ext.helper = helper
 
     # protected
     def register_format_helpers(self):
         # format
         helper = FormatGeneralFactory()
-        shared_format_extensions.pnf_helper = helper
-        shared_format_extensions.ted_helper = helper
+        ext = format_extensions()
+        ext.pnf_helper = helper
+        ext.ted_helper = helper
 
     # protected
     def register_account_helpers(self):
         # mkm
         helper = AccountGeneralFactory()
-        shared_account_extensions.address_helper = helper
-        shared_account_extensions.id_helper = helper
-        shared_account_extensions.meta_helper = helper
-        shared_account_extensions.doc_helper = helper
-        shared_account_extensions.helper = helper
+        ext = account_extensions()
+        ext.address_helper = helper
+        ext.id_helper = helper
+        ext.meta_helper = helper
+        ext.doc_helper = helper
+        ext.helper = helper
 
     # protected
     def register_message_helpers(self):
         # dkd
         helper = MessageGeneralFactory()
-        shared_message_extensions.content_helper = helper
-        shared_message_extensions.envelope_helper = helper
-        shared_message_extensions.instant_helper = helper
-        shared_message_extensions.secure_helper = helper
-        shared_message_extensions.reliable_helper = helper
-        shared_message_extensions.helper = helper
+        ext = message_extensions()
+        ext.content_helper = helper
+        ext.envelope_helper = helper
+        ext.instant_helper = helper
+        ext.secure_helper = helper
+        ext.reliable_helper = helper
+        ext.helper = helper
 
     # protected
     def register_command_helpers(self):
         # cmd
         helper = CommandGeneralFactory()
-        shared_message_extensions.cmd_helper = helper
-        shared_message_extensions.command_helper = helper
+        ext = command_extensions()
+        ext.cmd_helper = helper
+        ext.command_helper = helper
+
+
+def crypto_extensions() -> Union[SymmetricKeyExtension, PublicKeyExtension, PrivateKeyExtension,
+                                 GeneralCryptoExtension]:
+    return shared_crypto_extensions
+
+
+def format_extensions() -> Union[FormatExtensions, TransportableFileExtension]:
+    return shared_format_extensions
+
+
+def account_extensions() -> Union[AddressExtension, IDExtension, MetaExtension, DocumentExtension,
+                                  GeneralAccountExtension]:
+    return shared_account_extensions
+
+
+def message_extensions() -> Union[MessageExtensions, ContentExtension,
+                                  InstantMessageExtension, SecureMessageExtension, ReliableMessageExtension,
+                                  GeneralMessageExtension]:
+    return shared_message_extensions
+
+
+def command_extensions() -> Union[CommandExtension, CmdExtension]:
+    return shared_message_extensions

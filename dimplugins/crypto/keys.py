@@ -29,7 +29,8 @@ from typing import Dict
 from dimp import Mapper, Dictionary
 from dimp import CryptographyKey, EncryptKey, DecryptKey, SignKey, VerifyKey
 from dimp import SymmetricKey, AsymmetricKey, PublicKey, PrivateKey
-from dimp import GeneralCryptoHelper, shared_crypto_extensions
+from dimp import GeneralCryptoHelper
+from dimp import GeneralCryptoExtension, shared_crypto_extensions
 
 
 """
@@ -88,10 +89,13 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
         return cls.match_sign_key(sign_key=a, verify_key=b.public_key)
 
 
+def crypto_extensions() -> GeneralCryptoExtension:
+    return shared_crypto_extensions
+
+
 def crypto_helper() -> GeneralCryptoHelper:
-    helper = shared_crypto_extensions.helper
-    assert isinstance(helper, GeneralCryptoHelper), 'crypto helper error: %s' % helper
-    return helper
+    ext = crypto_extensions()
+    return ext.helper
 
 
 # noinspection PyAbstractClass

@@ -85,9 +85,9 @@ class HexCoder(DataCoder):
 class JSONCoder(ObjectCoder):
 
     # Override
-    def encode(self, obj: Any) -> str:
+    def encode(self, container: Any) -> str:
         """ JsON encode """
-        return json.dumps(obj)
+        return json.dumps(container)
 
     # Override
     def decode(self, string: str) -> Optional[Any]:
