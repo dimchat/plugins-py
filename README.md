@@ -107,18 +107,18 @@ class UnknownAddress(ConstantString, Address):
 ### Meta
 
 ```python
-from typing import Optional
+from typing import Optional, Dict
 
-from dimp import *
+from dimp import Meta
 from dimplugins import *
 
 
 class CompatibleMetaFactory(BaseMetaFactory):
 
     # Override
-    def parse_meta(self, meta: dict) -> Optional[Meta]:
-        ext = SharedAccountExtensions()
-        version = ext.helper.get_meta_type(meta=meta)
+    def parse_meta(self, meta: Dict) -> Optional[Meta]:
+        helper = account_helper()
+        version = helper.get_meta_type(meta=meta)
         if version in ['1', 'mkm', 'MKM']:
             # MKM
             out = DefaultMeta(meta=meta)
@@ -130,31 +130,40 @@ class CompatibleMetaFactory(BaseMetaFactory):
             out = ETHMeta(meta=meta)
         else:
             raise TypeError('unknown meta type: %d' % version)
-        if out.valid:
+        if out.is_valid:
             return out
+
+
+def account_extensions() -> GeneralAccountExtension:
+    return shared_account_extensions
+
+
+def account_helper() -> GeneralAccountHelper:
+    ext = account_extensions()
+    return ext.helper
 ```
 
-### Plugin Loader
+### ExtensionLoader
 
 ```python
-from dimp import Address, Meta
-from dimplugins import PluginLoader
+from dimp import MetaType, ContentType
+from dimplugins import ExtensionLoader
 
-from .address import CompatibleAddressFactory
-from .meta import CompatibleMetaFactory
+from ..protocol import HandshakeCommand, BaseHandshakeCommand
+from ..protocol import AppCustomizedContent
 
 
-class CompatiblePluginLoader(PluginLoader):
+class CommonExtensionLoader(ExtensionLoader):
 
     # Override
-    def _register_address_factory(self):
+    def register_address_factory(self):
         Address.set_factory(factory=CompatibleAddressFactory())
 
     # Override
-    def _register_meta_factories(self):
-        mkm = CompatibleMetaFactory(version=Meta.MKM)
-        btc = CompatibleMetaFactory(version=Meta.BTC)
-        eth = CompatibleMetaFactory(version=Meta.ETH)
+    def register_meta_factories(self):
+        mkm = CompatibleMetaFactory(version=MetaType.MKM)
+        btc = CompatibleMetaFactory(version=MetaType.BTC)
+        eth = CompatibleMetaFactory(version=MetaType.ETH)
         Meta.set_factory(version='1', factory=mkm)
         Meta.set_factory(version='2', factory=btc)
         Meta.set_factory(version='4', factory=eth)
@@ -164,31 +173,49 @@ class CompatiblePluginLoader(PluginLoader):
         Meta.set_factory(version='MKM', factory=mkm)
         Meta.set_factory(version='BTC', factory=btc)
         Meta.set_factory(version='ETH', factory=eth)
-```
-
-### ExtensionLoader
-
-```python
-from dimp import ContentType
-from dimp.plugins import ExtensionLoader
-
-from ..protocol import HandshakeCommand, BaseHandshakeCommand
-from ..protocol import AppCustomizedContent
-
-
-class CommonExtensionLoader(ExtensionLoader):
 
     # Override
-    def _register_customized_factories(self):
+    def register_content_factories(self):
+        super().register_content_factories()
+        self.register_customized_factories()
+
+    # protected
+    def register_customized_factories(self):
         # Application Customized
         self._set_content_factory(msg_type=ContentType.APPLICATION, content_class=AppCustomizedContent)
         self._set_content_factory(msg_type=ContentType.CUSTOMIZED, content_class=AppCustomizedContent)
 
     # Override
-    def _register_command_factories(self):
-        super()._register_command_factories()
+    def register_command_factories(self):
+        super().register_command_factories()
         # Handshake
         self._set_command_factory(cmd=HandshakeCommand.HANDSHAKE, command_class=BaseHandshakeCommand)
+```
+
+### Plugin Loader
+
+```python
+from dimplugins import PluginLoader
+
+from .mdx import MD5, MD5Digester
+from .mdx import SHA1, SHA1Digester
+
+
+class CommonPluginLoader(PluginLoader):
+
+    # Override
+    def _load_message_digesters(self):
+        super()._load_message_digesters()
+        self.register_md5_digester()
+        self.register_sha1_digester()
+
+    # protected
+    def register_md5_digester(self):
+        MD5.digester = MD5Digester()
+
+    # protected
+    def register_sha1_digester(self):
+        SHA1.digester = SHA1Digester()
 ```
 
 ## Usage
@@ -200,7 +227,7 @@ from dimplugins import ExtensionLoader
 from dimplugins import PluginLoader
 
 from .compat_loader import CommonExtensionLoader
-from .compat_loader import CompatiblePluginLoader
+from .compat_loader import CommonPluginLoader
 
 
 class LibraryLoader:
@@ -208,7 +235,7 @@ class LibraryLoader:
     def __init__(self, extensions: ExtensionLoader = None, plugins: PluginLoader = None):
         super().__init__()
         self.__extensions = CommonExtensionLoader() if extensions is None else extensions
-        self.__plugins = CompatiblePluginLoader() if plugins is None else plugins
+        self.__plugins = CommonPluginLoader() if plugins is None else plugins
         self.__loaded = False
 
     def run(self):

@@ -33,6 +33,10 @@ from .trans import BaseNetworkDataFactory, BaseNetworkFileFactory
 
 __all__ = [
 
+    #
+    #   Data Format
+    #
+
     'Base64Coder', 'Base58Coder', 'HexCoder',
     'JSONCoder', 'UTF8Coder',
     # 'CoderMixIn',
