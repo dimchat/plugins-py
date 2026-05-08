@@ -37,15 +37,24 @@ class MemoryCache(Generic[K, V], ABC):
     @property
     @abstractmethod
     def size(self) -> int:
-        raise NotImplemented
+        """ Get cached size """
+        raise NotImplementedError(
+            f'Not implemented: {type(self).__module__}.{type(self).__name__}.size getter'
+        )
 
     @abstractmethod
     def get(self, key: K) -> Optional[V]:
-        raise NotImplemented
+        """ Get cached value for key """
+        raise NotImplementedError(
+            f'Not implemented: {type(self).__module__}.{type(self).__name__}.get()'
+        )
 
     @abstractmethod
     def put(self, key: K, value: Optional[V]):
-        raise NotImplemented
+        """ Cache value for key """
+        raise NotImplementedError(
+            f'Not implemented: {type(self).__module__}.{type(self).__name__}.put()'
+        )
 
     def reduce_memory(self) -> int:
         """ Garbage Collection """

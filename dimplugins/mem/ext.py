@@ -46,19 +46,31 @@ class MemoryCacheExtension:
 
     @property
     def address_cache(self) -> MemoryCache[str, Address]:
-        raise NotImplemented
+        """ Get address cache """
+        raise NotImplementedError(
+            f'Not implemented: {type(self).__module__}.{type(self).__name__}.address_cache getter'
+        )
 
     @address_cache.setter
     def address_cache(self, cache: MemoryCache):
-        raise NotImplemented
+        """ Set address cache """
+        raise NotImplementedError(
+            f'Not implemented: {type(self).__module__}.{type(self).__name__}.address_cache setter'
+        )
 
     @property
     def id_cache(self) -> MemoryCache[str, ID]:
-        raise NotImplemented
+        """ Get ID cache """
+        raise NotImplementedError(
+            f'Not implemented: {type(self).__module__}.{type(self).__name__}.id_cache getter'
+        )
 
     @id_cache.setter
     def id_cache(self, cache: MemoryCache):
-        raise NotImplemented
+        """ Set ID cache """
+        raise NotImplementedError(
+            f'Not implemented: {type(self).__module__}.{type(self).__name__}.id_cache setter'
+        )
 
 
 shared_account_extensions.address_cache = ThanosCache()
