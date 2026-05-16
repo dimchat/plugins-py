@@ -43,7 +43,7 @@ class GeneralIdentifierFactory(IDFactory):
     # Override
     def generate_id(self, meta: Meta, network: int, terminal: Optional[str]) -> ID:
         address = Address.generate(meta=meta, network=network)
-        assert address is not None, 'failed to generate ID with meta: %s' % meta
+        assert address is not None, f'failed to generate ID with meta: {meta}'
         return ID.create(address=address, name=meta.seed, terminal=terminal)
 
     # Override
@@ -74,7 +74,7 @@ class GeneralIdentifierFactory(IDFactory):
     def _parse(self, identifier: str) -> Optional[ID]:
         # split ID string
         pair = identifier.split('/')
-        # assert len(pair[0]) > 0, 'ID error: %s' % identifier
+        # assert len(pair[0]) > 0, f'ID error: {identifier}'
         # terminal
         if len(pair) == 1:
             # no terminal
@@ -82,10 +82,10 @@ class GeneralIdentifierFactory(IDFactory):
         else:
             # got terminal
             terminal = pair[1]
-            # assert len(terminal) > 0, 'ID.terminal error: %s' % identifier
+            # assert len(terminal) > 0, f'ID.terminal error: {identifier}'
         # name @ address
         pair = pair[0].split('@')
-        # assert len(pair[0]) > 0, 'ID error: %s' % identifier
+        # assert len(pair[0]) > 0, f'ID error: {identifier}'
         if len(pair) == 1:
             # got address without name
             name = None
@@ -95,9 +95,9 @@ class GeneralIdentifierFactory(IDFactory):
             name = pair[0]
             address = Address.parse(address=pair[1])
         else:
-            # assert False, 'ID error: %s' % identifier
+            # assert False, f'ID error: {identifier}'
             return None
         if address is not None:
             return self._new_id(identifier=identifier, name=name, address=address, terminal=terminal)
         else:
-            assert False, 'ID error: %s' % identifier
+            assert False, f'ID error: {identifier}'

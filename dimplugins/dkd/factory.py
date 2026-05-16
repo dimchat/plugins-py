@@ -49,13 +49,16 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
 
     def __next(self) -> int:
         """ return 1 ~ 2^31-1 """
-        assert self.__sn >= 0, 'serial number error: %d' % self.__sn
+        sn = self.__sn
+        assert sn >= 0, f'serial number error: {sn}'
         with self.__lock:
-            if self.__sn < 0x7fffffff:  # 2 ** 31 - 1
-                self.__sn += 1
+            sn = self.__sn
+            if sn < 0x7fffffff:  # 2 ** 31 - 1
+                sn += 1
             else:
-                self.__sn = 1
-            return self.__sn
+                sn = 1
+            self.__sn = sn
+            return sn
 
     #
     #   EnvelopeFactory

@@ -77,7 +77,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
         # get type for did
         did = self.get_document_id(document=document)
         if did is None:
-            assert False, 'document error: %s' % document
+            assert False, f'document error: {document}'
             # return None
         elif did.is_user:
             return DocumentType.VISA
@@ -117,7 +117,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return address
         string = Wrapper.get_str(address)
         if string is None:
-            # assert False, 'address error: %s' % address
+            # assert False, f'address error: {address}'
             return None
         factory = self.get_address_factory()
         assert factory is not None, 'address factory not set'
@@ -155,7 +155,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return identifier
         string = Wrapper.get_str(identifier)
         if string is None:
-            # assert False, 'ID error: %s' % identifier
+            # assert False, f'ID error: {identifier}'
             return None
         factory = self.get_id_factory()
         assert factory is not None, 'ID factory not set'
@@ -176,14 +176,14 @@ class AccountGeneralFactory(GeneralAccountHelper,
     # Override
     def generate_meta(self, version: str, private_key: SignKey, seed: Optional[str]) -> Meta:
         factory = self.get_meta_factory(version)
-        assert factory is not None, 'failed to get meta factory: %s' % version
+        assert factory is not None, f'failed to get meta factory: {version}'
         return factory.generate_meta(private_key, seed=seed)
 
     # Override
     def create_meta(self, version: str, public_key: VerifyKey,
                     seed: Optional[str], fingerprint: Optional[TransportableData]) -> Meta:
         factory = self.get_meta_factory(version)
-        assert factory is not None, 'failed to get meta factory: %s' % version
+        assert factory is not None, f'failed to get meta factory: {version}'
         return factory.create_meta(public_key, seed=seed, fingerprint=fingerprint)
 
     # Override
@@ -194,16 +194,16 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return meta
         info = Wrapper.get_dict(meta)
         if info is None:
-            # assert False, 'meta error: %s' % meta
+            # assert False, f'meta error: {meta}'
             return None
         version = self.get_meta_type(meta=info)
-        # assert version is not None, 'meta type error: %s' % meta
+        # assert version is not None, f'meta type error: {meta}'
         factory = None if version is None else self.get_meta_factory(version)
         if factory is None:
             # unknown meta type, get default meta factory
             factory = self.get_meta_factory('*')  # unknown
             if factory is None:
-                # assert False, 'default meta factory not found: %s' % meta
+                # assert False, f'default meta factory not found: {meta}'
                 return None
         return factory.parse_meta(meta=info)
 
@@ -222,7 +222,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
     # Override
     def create_document(self, doc_type: str, data: Optional[str], signature: Optional[TransportableData]) -> Document:
         factory = self.get_document_factory(doc_type)
-        assert factory is not None, 'document factory not found for type: %s' % doc_type
+        assert factory is not None, f'document factory not found for type: {doc_type}'
         return factory.create_document(data=data, signature=signature)
 
     # Override
@@ -233,15 +233,15 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return document
         info = Wrapper.get_dict(document)
         if info is None:
-            # assert False, 'document error: %s' % document
+            # assert False, f'document error: {document}'
             return None
         doc_type = self.get_document_type(document=info)
-        # assert doc_type is not None, 'document type error: %s' % document
+        # assert doc_type is not None, f'document type error: {document}'
         factory = None if doc_type is None else self.get_document_factory(doc_type)
         if factory is None:
             # unknown document type, get default document factory
             factory = self.get_document_factory('*')  # unknown
             if factory is None:
-                # assert False, 'default document factory not found: %s' % document
+                # assert False, f'default document factory not found: {document}'
                 return None
         return factory.parse_document(document=info)

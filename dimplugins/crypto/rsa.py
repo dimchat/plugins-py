@@ -55,7 +55,7 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
         if verify_key is None:
             # data in 'PEM' format
             data = self.get('data')
-            assert data is not None, 'failed to get key data: %s' % self
+            assert data is not None, f'failed to get key data: {self}'
             verify_key = RSA.importKey(data)
             self.__key = verify_key
         return verify_key
@@ -65,7 +65,7 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
         ted = self.__data
         if ted is None:
             rsa_key = self.rsa_key
-            assert rsa_key is not None, 'rsa key error: %s' % self
+            assert rsa_key is not None, f'rsa key error: {self}'
             binary = rsa_key.exportKey(format='DER')
             ted = PlainData.create(binary=binary)
             self.__data = ted
@@ -131,7 +131,7 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
         if self.__key is None:
             # data in 'PEM' format
             data = self.get('data')
-            assert data is not None, 'failed to get key data: %s' % self
+            assert data is not None, f'failed to get key data: {self}'
             tag1 = '-----BEGIN RSA PRIVATE KEY-----'
             tag2 = '-----END RSA PRIVATE KEY-----'
             pos2 = data.rfind(tag2)
@@ -146,7 +146,7 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
         ted = self.__data
         if ted is None:
             rsa_key = self.rsa_key
-            assert rsa_key is not None, 'rsa key error: %s' % self
+            assert rsa_key is not None, f'rsa key error: {self}'
             binary = rsa_key.exportKey(format='DER')
             ted = PlainData.create(binary=binary)
             self.__data = ted

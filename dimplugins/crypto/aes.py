@@ -101,9 +101,9 @@ class AESKey(BaseSymmetricKey):
         ted = self.__data
         if ted is None:
             base64 = self.get('data')
-            assert base64 is not None, 'key data not found: %s' % self
+            assert base64 is not None, f'key data not found: {self}'
             ted = TransportableData.parse(base64)
-            assert ted is not None, 'key data error: %s' % base64
+            assert ted is not None, f'key data error: {base64}'
             self.__data = ted
         return ted
 
@@ -127,7 +127,7 @@ class AESKey(BaseSymmetricKey):
             iv = ted.to_bytes()
             if iv is not None:
                 return iv
-        assert base64 is None, 'IV data error: %s' % base64
+        assert base64 is None, f'IV data error: {base64}'
 
     def _zero_init_vector(self) -> bytes:
         # zero IV:
@@ -190,7 +190,7 @@ def pkcs7_pad(data: bytes, block_size: int) -> bytes:
 def pkcs7_unpad(data: bytes) -> bytes:
     assert data is not None and len(data) > 0, 'data empty'
     amount = data[-1]
-    assert len(data) >= amount
+    assert len(data) >= amount, f'PKCS7 data error: {data}'
     return data[:-amount]
 
 

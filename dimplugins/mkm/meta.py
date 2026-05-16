@@ -75,7 +75,7 @@ class DefaultMeta(BaseMeta):
 
     # Override
     def generate_address(self, network: int = None) -> Address:
-        # assert self.type == 'MKM' or self.type == '1', 'meta version error: %s' % self.type
+        # assert self.type == 'MKM' or self.type == '1', f'meta version error: {self.type}'
         assert network is not None, 'address type should not be empty'
         # check caches
         cached = self.__addresses.get(network)
@@ -118,7 +118,7 @@ class BTCMeta(BaseMeta):
 
     # Override
     def generate_address(self, network: int = None) -> Address:
-        # assert self.type == 'BTC' or self.type == '2', 'meta version error: %s' % self.type
+        # assert self.type == 'BTC' or self.type == '2', f'meta version error: {self.type}'
         assert network is not None, 'address type should not be empty'
         # check caches
         cached = self.__addresses.get(network)
@@ -162,8 +162,8 @@ class ETHMeta(BaseMeta):
 
     # Override
     def generate_address(self, network: int = None) -> Address:
-        # assert self.type == 'ETH' or self.type == '4', 'meta version error: %s' % self.type
-        assert network == EntityType.USER, 'ETH address type error: %d' % network
+        # assert self.type == 'ETH' or self.type == '4', f'meta version error: {self.type}'
+        assert network == EntityType.USER, f'ETH address type error: {network}'
         # check cache
         cached = self.__address
         if cached is None:  # or cached.type != network:
@@ -194,7 +194,7 @@ class BaseMetaFactory(MetaFactory):
         else:
             sig = private_key.sign(data=utf8_encode(string=seed))
             fingerprint = Base64Data.create(binary=sig)
-        assert isinstance(private_key, PrivateKey), 'private key error: %s' % private_key
+        assert isinstance(private_key, PrivateKey), f'private key error: {private_key}'
         public_key = private_key.public_key
         return self.create_meta(public_key=public_key, seed=seed, fingerprint=fingerprint)
 
@@ -208,8 +208,8 @@ class BaseMetaFactory(MetaFactory):
         elif version == MetaType.ETH:
             out = ETHMeta(version=version, public_key=public_key)
         else:
-            raise TypeError('unknown meta type: %s' % version)
-        assert out.is_valid, 'meta error: %s' % out
+            raise TypeError(f'unknown meta type: {version}')
+        assert out.is_valid, f'meta error: {out}'
         return out
 
     # Override
@@ -221,9 +221,9 @@ class BaseMetaFactory(MetaFactory):
             return None
         elif 'seed' not in meta:
             if 'fingerprint' in meta:
-                assert False, 'meta error: %s' % meta
+                assert False, f'meta error: {meta}'
         elif 'fingerprint' not in meta:
-            assert False, 'meta error: %s' % meta
+            assert False, f'meta error: {meta}'
         helper = account_helper()
         version = helper.get_meta_type(meta=meta)
         if version == MetaType.MKM:
@@ -233,7 +233,7 @@ class BaseMetaFactory(MetaFactory):
         elif version == MetaType.ETH:
             out = ETHMeta(meta=meta)
         else:
-            raise TypeError('unknown meta type: %s' % version)
+            raise TypeError(f'unknown meta type: {version}')
         if out.is_valid:
             return out
-        # assert False, 'meta error: %s' % meta
+        # assert False, f'meta error: {meta}'

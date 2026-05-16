@@ -52,11 +52,11 @@ class GeneralDocumentFactory(DocumentFactory):
     # Override
     def create_document(self, data: Optional[str], signature: Optional[TransportableData]) -> Document:
         if data is None or len(data) == 0:
-            assert signature is None, 'document error: %s, signature: %s' % (data, signature)
+            assert signature is None, f'document error: {data}, signature: {signature}'
             # 1. create empty document
             return self._create_empty_document()
         elif signature is None or signature.is_empty:
-            # assert False, 'document error: %s, signature: %s' % (data, signature)
+            # assert False, f'document error: {data}, signature: {signature}'
             return self._create_empty_document()
         # 2. create document with data & signature from local storage
         return self._create_valid_document(data=data, signature=signature)

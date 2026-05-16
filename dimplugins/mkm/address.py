@@ -85,7 +85,7 @@ class BaseAddressFactory(AddressFactory, ABC):
         elif size == 42:
             res = ETHAddress.from_str(address=address)
         else:
-            assert False, 'invalid address: %s' % address
+            assert False, f'invalid address: {address}'
         # TODO: other types of address
-        assert res is not None, 'invalid address: %s' % address
+        assert res is not None, f'invalid address: {address}'
         return res

@@ -68,7 +68,7 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
     # Override
     def generate_symmetric_key(self, algorithm: str) -> Optional[SymmetricKey]:
         factory = self.get_symmetric_key_factory(algorithm=algorithm)
-        assert factory is not None, 'key algorithm not support: %s' % algorithm
+        assert factory is not None, f'key algorithm not support: {algorithm}'
         return factory.generate_symmetric_key()
 
     # Override
@@ -79,16 +79,16 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
             return key
         info = Wrapper.get_dict(key)
         if info is None:
-            # assert False, 'symmetric key error: %s' % key
+            # assert False, f'symmetric key error: {key}'
             return None
         alg = self.get_key_algorithm(key=info)
-        # assert alg is not None, 'symmetric key error: %s' % key
+        # assert alg is not None, f'symmetric key error: {key}'
         factory = None if alg is None else self.get_symmetric_key_factory(algorithm=alg)
         if factory is None:
             # unknown algorithm, get default key factory
             factory = self.get_symmetric_key_factory(algorithm='*')  # unknown
             if factory is None:
-                # assert False, 'default symmetric key factory not found: %s' % key
+                # assert False, f'default symmetric key factory not found: {key}'
                 return None
         return factory.parse_symmetric_key(key=info)
 
@@ -112,16 +112,16 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
             return key
         info = Wrapper.get_dict(key)
         if info is None:
-            # assert False, 'public key error: %s' % key
+            # assert False, f'public key error: {key}'
             return None
         alg = self.get_key_algorithm(key=info)
-        # assert alg is not None, 'public key error: %s' % key
+        # assert alg is not None, f'public key error: {key}'
         factory = None if alg is None else self.get_public_key_factory(algorithm=alg)
         if factory is None:
             # unknown algorithm, get default key factory
             factory = self.get_public_key_factory(algorithm='*')  # unknown
             if factory is None:
-                # assert False, 'default public key factory not found: %s' % key
+                # assert False, f'default public key factory not found: {key}'
                 return None
         return factory.parse_public_key(key=info)
 
@@ -140,7 +140,7 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
     # Override
     def generate_private_key(self, algorithm: str) -> Optional[PrivateKey]:
         factory = self.get_private_key_factory(algorithm=algorithm)
-        assert factory is not None, 'key algorithm not support: %s' % algorithm
+        assert factory is not None, f'key algorithm not support: {algorithm}'
         return factory.generate_private_key()
 
     # Override
@@ -151,15 +151,15 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
             return key
         info = Wrapper.get_dict(key)
         if info is None:
-            # assert False, 'private key error: %s' % key
+            # assert False, f'private key error: {key}'
             return None
         alg = self.get_key_algorithm(key=info)
-        # assert alg is not None, 'private key error: %s' % key
+        # assert alg is not None, f'private key error: {key}'
         factory = None if alg is None else self.get_private_key_factory(algorithm=alg)
         if factory is None:
             # unknown algorithm, get default key factory
             factory = self.get_private_key_factory(algorithm='*')  # unknown
             if factory is None:
-                # assert False, 'default private key factory not found: %s' % key
+                # assert False, f'default private key factory not found: {key}'
                 return None
         return factory.parse_private_key(key=info)

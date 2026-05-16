@@ -64,7 +64,7 @@ class ECCPublicKey(BasePublicKey):
         if verify_key is None:
             # data in 'PEM' format
             data = self.get('data')
-            assert data is not None, 'failed to get key data: %s' % self
+            assert data is not None, f'failed to get key data: {self}'
             data_len = len(data)
             if data_len == 130 or data_len == 128:
                 data = bytes.fromhex(data)
@@ -79,7 +79,7 @@ class ECCPublicKey(BasePublicKey):
         ted = self.__data
         if ted is None:
             ecc_key = self.ecc_key
-            assert ecc_key is not None, 'ecc key error: %s' % self
+            assert ecc_key is not None, f'ecc key error: {self}'
             if self.compressed:
                 encoding = 'compressed'
             else:
@@ -159,7 +159,7 @@ class ECCPrivateKey(BasePrivateKey):
         sign_key = self.__key
         if sign_key is None:
             data = self.get('data')
-            assert data is not None, 'failed to get key data: %s' % self
+            assert data is not None, f'failed to get key data: {self}'
             if len(data) == 64:
                 # key data in 'HEX' format
                 data = bytes.fromhex(data)
@@ -175,7 +175,7 @@ class ECCPrivateKey(BasePrivateKey):
         ted = self.__data
         if ted is None:
             ecc_key = self.ecc_key
-            assert ecc_key is not None, 'ecc key error: %s' % self
+            assert ecc_key is not None, f'ecc key error: {self}'
             binary = ecc_key.to_string()
             ted = PlainData.create(binary=binary)
             self.__data = ted

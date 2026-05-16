@@ -63,7 +63,7 @@ class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
         # unwrap
         string = Wrapper.get_str(ted)
         if string is None:
-            # assert False, 'TED error: %s' % ted
+            # assert False, f'TED error: {ted}'
             return None
         factory = self.get_transportable_data_factory()
         assert factory is not None, 'TED factory not set'
@@ -97,7 +97,7 @@ class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
         # unwrap
         info = self._get_transportable_file_content(pnf)
         if info is None:
-            # assert False, 'PNF error: %s' % pnf
+            # assert False, f'PNF error: {pnf}'
             return None
         factory = self.get_transportable_file_factory()
         assert factory is not None, 'PNF factory not ready'
@@ -111,11 +111,11 @@ class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
             return pnf
         text = Wrapper.get_str(pnf)
         if text is None or len(text) < 8:
-            # assert False, 'PNF error: %s' % pnf
+            # assert False, f'PNF error: {pnf}'
             return None
         elif text.startswith('{'):
             # decode JSON string
-            assert text.endswith('}'), 'PNF json error: %s' % pnf
+            assert text.endswith('}'), f'PNF json error: {pnf}'
             return JSONMap.decode(string=text)
         content = {}
         # 1. check for URL: 'http://...'

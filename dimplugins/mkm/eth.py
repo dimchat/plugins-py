@@ -60,7 +60,7 @@ class ETHAddress(ConstantString, Address):
     def validate_address(cls, address: str) -> Optional[str]:
         if is_eth(address=address):
             lower = address[2:].lower()
-            return '0x%s' % eip55(address=lower)
+            return '0x' + eip55(address=lower)
         # not an ETH address
 
     @classmethod
@@ -82,7 +82,7 @@ class ETHAddress(ConstantString, Address):
         if len(fingerprint) == 65:
             # skip first char
             fingerprint = fingerprint[1:]
-        assert len(fingerprint) == 64, 'key data length error: %d' % len(fingerprint)
+        assert len(fingerprint) == 64, f'key data length error: {len(fingerprint)}'
         # 1. digest = keccak256(fingerprint)
         digest = keccak256(data=fingerprint)
         # 2. address = hex_encode(digest.suffix(20))

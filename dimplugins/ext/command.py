@@ -68,17 +68,17 @@ class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
             return content
         info = Wrapper.get_dict(content)
         if info is None:
-            # assert False, 'command content error: %s' % content
+            # assert False, f'command content error: {content}'
             return None
         # get factory by command name
         cmd = self.get_cmd(content=info)
-        # assert cmd is not None, 'command name not found: %s' % content
+        # assert cmd is not None, f'command name not found: {content}'
         factory = None if cmd is None else self.get_command_factory(cmd=cmd)
         if factory is None:
             # unknown command name, get base command factory
             factory = default_factory(info=info)
             if factory is None:
-                # assert False, 'cannot parse command: %s' % content
+                # assert False, f'cannot parse command: {content}'
                 return None
         return factory.parse_command(content=info)
 
@@ -90,7 +90,7 @@ def default_factory(info: Dict) -> Optional[CommandFactory]:
         fact = get_content_factory(msg_type)
         if isinstance(fact, CommandFactory):
             return fact
-    assert False, 'cannot parse command: %s' % info
+    assert False, f'cannot parse command: {info}'
 
 
 def get_content_type(content: Dict, default: Optional[str] = None) -> Optional[str]:

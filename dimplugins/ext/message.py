@@ -85,17 +85,17 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return content
         info = Wrapper.get_dict(content)
         if info is None:
-            # assert False, 'message content error: %s' % content
+            # assert False, f'message content error: {content}'
             return None
         # get factory by content type
         msg_type = self.get_content_type(content=info)
-        # assert msg_type is not None, 'content error: %s' % content
+        # assert msg_type is not None, f'content error: {content}'
         factory = None if msg_type is None else self.get_content_factory(msg_type)
         if factory is None:
             # unknown content type, get default content factory
             factory = self.get_content_factory('*')  # unknown
             if factory is None:
-                # assert False, 'default content factory not found: %s' % content
+                # assert False, f'default content factory not found: {content}'
                 return None
         return factory.parse_content(content=info)
 
@@ -125,7 +125,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return envelope
         info = Wrapper.get_dict(envelope)
         if info is None:
-            # assert False, 'message envelope error: %s' % envelope
+            # assert False, f'message envelope error: {envelope}'
             return None
         factory = self.get_envelope_factory()
         assert factory is not None, 'envelope factory not ready'
@@ -157,7 +157,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return msg
         info = Wrapper.get_dict(msg)
         if info is None:
-            # assert False, 'instant message error: %s' % msg
+            # assert False, f'instant message error: {msg}'
             return None
         factory = self.get_instant_message_factory()
         assert factory is not None, 'instant message factory not ready'
@@ -189,7 +189,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return msg
         info = Wrapper.get_dict(msg)
         if info is None:
-            # assert False, 'secure message error: %s' % msg
+            # assert False, f'secure message error: {msg}'
             return None
         factory = self.get_secure_message_factory()
         assert factory is not None, 'secure message factory not ready'
@@ -215,7 +215,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return msg
         info = Wrapper.get_dict(msg)
         if info is None:
-            # assert False, 'reliable message error: %s' % msg
+            # assert False, f'reliable message error: {msg}'
             return None
         factory = self.get_reliable_message_factory()
         assert factory is not None, 'reliable message factory not ready'
