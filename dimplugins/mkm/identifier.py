@@ -72,31 +72,16 @@ class GeneralIdentifierFactory(IDFactory):
         return Identifier(identifier=identifier, name=name, address=address, terminal=terminal)
 
     def _parse(self, identifier: str) -> Optional[ID]:
-        # split ID string
+        # split for "terminal"
         pair = identifier.split('/')
-        # assert len(pair[0]) > 0, f'ID error: {identifier}'
-        # terminal
-        if len(pair) == 1:
-            # no terminal
-            terminal = None
-        else:
-            # got terminal
-            terminal = pair[1]
-            # assert len(terminal) > 0, f'ID.terminal error: {identifier}'
-        # name @ address
+        cnt = len(pair)
+        terminal = None if cnt == 1 else pair[1]
+        # split for "name" @ "address"
         pair = pair[0].split('@')
-        # assert len(pair[0]) > 0, f'ID error: {identifier}'
-        if len(pair) == 1:
-            # got address without name
-            name = None
-            address = Address.parse(address=pair[0])
-        elif len(pair) == 2:
-            # got name & address
-            name = pair[0]
-            address = Address.parse(address=pair[1])
-        else:
-            # assert False, f'ID error: {identifier}'
-            return None
+        cnt = len(pair)
+        name = None if cnt == 1 else pair[0]
+        address = Address.parse(address=pair[cnt-1])
+        # done
         if address is not None:
             return self._new_id(identifier=identifier, name=name, address=address, terminal=terminal)
         else:

@@ -25,7 +25,7 @@
 
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
-from typing import Optional
+from typing import Optional, Dict
 
 
 K = TypeVar('K')
@@ -89,11 +89,11 @@ class ThanosCache(MemoryCache[K, V]):
         return finger >> 1
 
 
-def thanos(planet: dict, finger: int) -> int:
+def thanos(planet: Dict, finger: int) -> int:
     """ Thanos can kill half lives of a world with a snap of the finger """
     people = planet.keys()
     for anybody in people:
         if (++finger & 1) == 1:
             # kill it
-            planet.pop(anybody)
+            planet.pop(anybody, None)
     return finger

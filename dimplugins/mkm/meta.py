@@ -213,7 +213,7 @@ class BaseMetaFactory(MetaFactory):
         return out
 
     # Override
-    def parse_meta(self, meta: dict) -> Optional[Meta]:
+    def parse_meta(self, meta: Dict) -> Optional[Meta]:
         # check 'type', 'key', 'seed', 'fingerprint'
         if 'type' not in meta or 'key' not in meta:
             # meta.type should not be empty

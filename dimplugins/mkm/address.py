@@ -67,9 +67,7 @@ class BaseAddressFactory(AddressFactory, ABC):
     # noinspection PyMethodMayBeStatic
     def _parse(self, address: str) -> Optional[Address]:
         size = len(address)
-        if size == 0:
-            assert False, 'address should not be empty'
-        elif size == 8:
+        if size == 8:
             # "anywhere"
             if address.lower() == 'anywhere':
                 return ANYWHERE
@@ -81,11 +79,10 @@ class BaseAddressFactory(AddressFactory, ABC):
         #  checking normal address
         #
         if 26 <= size <= 35:
-            res = BTCAddress.from_str(address=address)
+            return BTCAddress.from_str(address=address)
         elif size == 42:
-            res = ETHAddress.from_str(address=address)
-        else:
-            assert False, f'invalid address: {address}'
+            return ETHAddress.from_str(address=address)
+        #
         # TODO: other types of address
-        assert res is not None, f'invalid address: {address}'
-        return res
+        #
+        assert False, f'invalid address: {address}'

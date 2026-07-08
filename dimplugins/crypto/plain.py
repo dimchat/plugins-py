@@ -82,7 +82,7 @@ class PlainKeyFactory(SymmetricKeyFactory):
         return PlainKey.new_key()
 
     # Override
-    def parse_symmetric_key(self, key: dict) -> Optional[SymmetricKey]:
+    def parse_symmetric_key(self, key: Dict) -> Optional[SymmetricKey]:
         # check 'algorithm'
         algorithm = BaseKey.get_key_algorithm(key=key)
         if algorithm != SymmetricAlgorithms.PLAIN:
