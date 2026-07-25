@@ -28,6 +28,7 @@
 # SOFTWARE.
 # ==============================================================================
 
+from collections.abc import Mapping
 from typing import Optional, Any, Dict
 
 from dimp import DateTime, Converter, Wrapper
@@ -61,7 +62,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
         self.__reliable_message_factory: Optional[ReliableMessageFactory] = None
 
     # Override
-    def get_content_type(self, content: Dict, default: Optional[str] = None) -> Optional[str]:
+    def get_content_type(self, content: Mapping, default: Optional[str] = None) -> Optional[str]:
         value = content.get('type')
         return Converter.get_str(value=value, default=default)
 
@@ -83,7 +84,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return None
         elif isinstance(content, Content):
             return content
-        info = Wrapper.get_dict(content)
+        info = Wrapper.get_map(content)
         if info is None:
             # assert False, f'message content error: {content}'
             return None
@@ -123,7 +124,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return None
         elif isinstance(envelope, Envelope):
             return envelope
-        info = Wrapper.get_dict(envelope)
+        info = Wrapper.get_map(envelope)
         if info is None:
             # assert False, f'message envelope error: {envelope}'
             return None
@@ -155,7 +156,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return None
         elif isinstance(msg, InstantMessage):
             return msg
-        info = Wrapper.get_dict(msg)
+        info = Wrapper.get_map(msg)
         if info is None:
             # assert False, f'instant message error: {msg}'
             return None
@@ -187,7 +188,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return None
         elif isinstance(msg, SecureMessage):
             return msg
-        info = Wrapper.get_dict(msg)
+        info = Wrapper.get_map(msg)
         if info is None:
             # assert False, f'secure message error: {msg}'
             return None
@@ -213,7 +214,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
             return None
         elif isinstance(msg, ReliableMessage):
             return msg
-        info = Wrapper.get_dict(msg)
+        info = Wrapper.get_map(msg)
         if info is None:
             # assert False, f'reliable message error: {msg}'
             return None

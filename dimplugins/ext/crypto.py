@@ -23,6 +23,7 @@
 # SOFTWARE.
 # ==============================================================================
 
+from collections.abc import Mapping
 from typing import Optional, Any, Dict
 
 from dimp import Converter, Wrapper
@@ -48,7 +49,7 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
         self.__private_key_factories: Dict[str, PrivateKeyFactory] = {}
 
     # Override
-    def get_key_algorithm(self, key: Dict, default: Optional[str] = None) -> Optional[str]:
+    def get_key_algorithm(self, key: Mapping, default: Optional[str] = None) -> Optional[str]:
         """ get key algorithm name """
         value = key.get('algorithm')
         return Converter.get_str(value=value, default=default)
@@ -77,7 +78,7 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
             return None
         if isinstance(key, SymmetricKey):
             return key
-        info = Wrapper.get_dict(key)
+        info = Wrapper.get_map(key)
         if info is None:
             # assert False, f'symmetric key error: {key}'
             return None
@@ -110,7 +111,7 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
             return None
         elif isinstance(key, PublicKey):
             return key
-        info = Wrapper.get_dict(key)
+        info = Wrapper.get_map(key)
         if info is None:
             # assert False, f'public key error: {key}'
             return None
@@ -149,7 +150,7 @@ class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
             return None
         elif isinstance(key, PrivateKey):
             return key
-        info = Wrapper.get_dict(key)
+        info = Wrapper.get_map(key)
         if info is None:
             # assert False, f'private key error: {key}'
             return None

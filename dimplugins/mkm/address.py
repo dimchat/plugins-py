@@ -67,6 +67,9 @@ class BaseAddressFactory(AddressFactory, ABC):
     # noinspection PyMethodMayBeStatic
     def _parse(self, address: str) -> Optional[Address]:
         size = len(address)
+        #
+        #  check broadcast address
+        #
         if size == 8:
             # "anywhere"
             if address.lower() == 'anywhere':

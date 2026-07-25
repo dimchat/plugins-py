@@ -28,6 +28,7 @@
 # SOFTWARE.
 # ==============================================================================
 
+from collections.abc import Mapping
 from typing import Optional, Union, Any, Dict
 
 from dimp import Wrapper, Converter
@@ -44,7 +45,7 @@ class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
         self.__command_factories: Dict[str, CommandFactory] = {}
 
     # Override
-    def get_cmd(self, content: Dict, default: Optional[str] = None) -> Optional[str]:
+    def get_cmd(self, content: Mapping, default: Optional[str] = None) -> Optional[str]:
         cmd = content.get('command')
         return Converter.get_str(value=cmd, default=default)
 
@@ -66,7 +67,7 @@ class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
             return None
         elif isinstance(content, Command):
             return content
-        info = Wrapper.get_dict(content)
+        info = Wrapper.get_map(content)
         if info is None:
             # assert False, f'command content error: {content}'
             return None
@@ -83,7 +84,7 @@ class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
         return factory.parse_command(content=info)
 
 
-def default_factory(info: Dict) -> Optional[CommandFactory]:
+def default_factory(info: Mapping) -> Optional[CommandFactory]:
     """ get factory by content type """
     msg_type = get_content_type(content=info)
     if msg_type is not None:
@@ -93,7 +94,7 @@ def default_factory(info: Dict) -> Optional[CommandFactory]:
     assert False, f'cannot parse command: {info}'
 
 
-def get_content_type(content: Dict, default: Optional[str] = None) -> Optional[str]:
+def get_content_type(content: Mapping, default: Optional[str] = None) -> Optional[str]:
     ext = message_extensions()
     helper = ext.helper
     return helper.get_content_type(content=content, default=default)

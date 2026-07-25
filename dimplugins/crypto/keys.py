@@ -24,7 +24,7 @@
 # ==============================================================================
 
 from abc import ABC
-from typing import Dict
+from collections.abc import Mapping
 
 from dimp import Mapper, Dictionary
 from dimp import CryptographyKey, EncryptKey, DecryptKey, SignKey, VerifyKey
@@ -42,12 +42,12 @@ from dimp import GeneralCryptoExtension, shared_crypto_extensions
 # noinspection PyAbstractClass
 class BaseKey(Dictionary, CryptographyKey, ABC):
 
-    def __init__(self, key: Dict):
+    def __init__(self, key: Mapping):
         super().__init__(key)
 
     @property  # Override
     def algorithm(self) -> str:
-        info = self.to_dict()
+        info = self.to_map()
         return BaseKey.get_key_algorithm(key=info)
 
     #
@@ -55,7 +55,7 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
     #
 
     @classmethod
-    def get_key_algorithm(cls, key: Dict) -> str:
+    def get_key_algorithm(cls, key: Mapping) -> str:
         helper = crypto_helper()
         algorithm = helper.get_key_algorithm(key=key)
         return '' if algorithm is None else algorithm
@@ -101,7 +101,7 @@ def crypto_helper() -> GeneralCryptoHelper:
 # noinspection PyAbstractClass
 class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
 
-    def __init__(self, key: Dict):
+    def __init__(self, key: Mapping):
         super().__init__(key)
 
     # Override
@@ -113,8 +113,8 @@ class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
             elif isinstance(other, SymmetricKey):
                 return BaseKey.symmetric_keys_equal(other, self)
             # compare with inner map
-            other = other.to_dict()
-        return self.to_dict().__eq__(other)
+            other = other.to_map()
+        return self.to_map().__eq__(other)
 
     # Override
     def __ne__(self, other) -> bool:
@@ -125,12 +125,12 @@ class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
             elif isinstance(other, SymmetricKey):
                 return not BaseKey.symmetric_keys_equal(other, self)
             # compare with inner map
-            other = other.to_dict()
-        return self.to_dict().__ne__(other)
+            other = other.to_map()
+        return self.to_map().__ne__(other)
 
     @property  # Override
     def algorithm(self) -> str:
-        info = self.to_dict()
+        info = self.to_map()
         return BaseKey.get_key_algorithm(key=info)
 
     # Override
@@ -141,24 +141,24 @@ class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
 # noinspection PyAbstractClass
 class BaseAsymmetricKey(Dictionary, AsymmetricKey, ABC):
 
-    def __init__(self, key: Dict):
+    def __init__(self, key: Mapping):
         super().__init__(key)
 
     @property  # Override
     def algorithm(self) -> str:
-        info = self.to_dict()
+        info = self.to_map()
         return BaseKey.get_key_algorithm(key=info)
 
 
 # noinspection PyAbstractClass
 class BasePublicKey(Dictionary, PublicKey, ABC):
 
-    def __init__(self, key: Dict):
+    def __init__(self, key: Mapping):
         super().__init__(key)
 
     @property  # Override
     def algorithm(self) -> str:
-        info = self.to_dict()
+        info = self.to_map()
         return BaseKey.get_key_algorithm(key=info)
 
     # Override
@@ -169,7 +169,7 @@ class BasePublicKey(Dictionary, PublicKey, ABC):
 # noinspection PyAbstractClass
 class BasePrivateKey(Dictionary, PrivateKey, ABC):
 
-    def __init__(self, key: Dict):
+    def __init__(self, key: Mapping):
         super().__init__(key)
 
     # Override
@@ -181,8 +181,8 @@ class BasePrivateKey(Dictionary, PrivateKey, ABC):
             elif isinstance(other, PrivateKey):
                 return BaseKey.private_keys_equal(other, self)
             # compare with inner map
-            other = other.to_dict()
-        return self.to_dict().__eq__(other)
+            other = other.to_map()
+        return self.to_map().__eq__(other)
 
     # Override
     def __ne__(self, other) -> bool:
@@ -193,10 +193,10 @@ class BasePrivateKey(Dictionary, PrivateKey, ABC):
             elif isinstance(other, PrivateKey):
                 return not BaseKey.private_keys_equal(other, self)
             # compare with inner map
-            other = other.to_dict()
-        return self.to_dict().__ne__(other)
+            other = other.to_map()
+        return self.to_map().__ne__(other)
 
     @property  # Override
     def algorithm(self) -> str:
-        info = self.to_dict()
+        info = self.to_map()
         return BaseKey.get_key_algorithm(key=info)

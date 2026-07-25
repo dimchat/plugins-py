@@ -28,6 +28,7 @@
 # SOFTWARE.
 # ==============================================================================
 
+from collections.abc import Mapping
 from typing import Optional, Any, Dict
 
 from dimp import Converter, Wrapper
@@ -62,13 +63,13 @@ class AccountGeneralFactory(GeneralAccountHelper,
         self.__docs_factories: Dict[str, DocumentFactory] = {}
 
     # Override
-    def get_meta_type(self, meta: Dict, default: Optional[str] = None) -> Optional[str]:
+    def get_meta_type(self, meta: Mapping, default: Optional[str] = None) -> Optional[str]:
         """ get meta type(version) """
         value = meta.get('type')
         return Converter.get_str(value=value, default=default)
 
     # Override
-    def get_document_type(self, document: Dict, default: Optional[str] = None) -> Optional[str]:
+    def get_document_type(self, document: Mapping, default: Optional[str] = None) -> Optional[str]:
         value = document.get('type')
         if value is not None:
             return Converter.get_str(value=value, default=default)
@@ -87,7 +88,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return DocumentType.PROFILE
 
     # Override
-    def get_document_id(self, document: Dict) -> Optional[ID]:
+    def get_document_id(self, document: Mapping) -> Optional[ID]:
         did = document.get('did')
         return ID.parse(identifier=did)
 
@@ -192,7 +193,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return None
         elif isinstance(meta, Meta):
             return meta
-        info = Wrapper.get_dict(meta)
+        info = Wrapper.get_map(meta)
         if info is None:
             # assert False, f'meta error: {meta}'
             return None
@@ -231,7 +232,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return None
         elif isinstance(document, Document):
             return document
-        info = Wrapper.get_dict(document)
+        info = Wrapper.get_map(document)
         if info is None:
             # assert False, f'document error: {document}'
             return None
