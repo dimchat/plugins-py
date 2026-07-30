@@ -107,7 +107,8 @@ class UnknownAddress(ConstantString, Address):
 ### Meta
 
 ```python
-from typing import Optional, Dict
+from collections.abc import Mapping
+from typing import Optional
 
 from dimp import Meta
 from dimplugins import *
@@ -116,7 +117,7 @@ from dimplugins import *
 class CompatibleMetaFactory(BaseMetaFactory):
 
     # Override
-    def parse_meta(self, meta: Dict) -> Optional[Meta]:
+    def parse_meta(self, meta: Mapping) -> Optional[Meta]:
         helper = account_helper()
         version = helper.get_meta_type(meta=meta)
         if version in ['1', 'mkm', 'MKM']:

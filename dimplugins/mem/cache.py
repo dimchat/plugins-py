@@ -24,8 +24,9 @@
 # ==============================================================================
 
 from abc import ABC, abstractmethod
+from collections.abc import MutableMapping
 from typing import TypeVar, Generic
-from typing import Optional, Dict
+from typing import Optional
 
 
 K = TypeVar('K')
@@ -89,7 +90,7 @@ class ThanosCache(MemoryCache[K, V]):
         return finger >> 1
 
 
-def thanos(planet: Dict, finger: int) -> int:
+def thanos(planet: MutableMapping, finger: int) -> int:
     """ Thanos can kill half lives of a world with a snap of the finger """
     people = planet.keys()
     for anybody in people:

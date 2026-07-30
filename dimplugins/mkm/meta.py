@@ -28,7 +28,8 @@
 # SOFTWARE.
 # ==============================================================================
 
-from typing import Optional, Dict
+from collections.abc import Mapping
+from typing import Optional
 
 from dimp import utf8_encode
 from dimp import TransportableData
@@ -62,7 +63,7 @@ from .eth import ETHAddress
 
 class DefaultMeta(BaseMeta):
 
-    def __init__(self, meta: Dict = None,
+    def __init__(self, meta: Mapping = None,
                  version: str = None, public_key: VerifyKey = None,
                  seed: Optional[str] = None, fingerprint: Optional[TransportableData] = None):
         super().__init__(meta=meta, version=version, public_key=public_key, seed=seed, fingerprint=fingerprint)
@@ -105,7 +106,7 @@ class DefaultMeta(BaseMeta):
 
 class BTCMeta(BaseMeta):
 
-    def __init__(self, meta: Dict = None,
+    def __init__(self, meta: Mapping = None,
                  version: str = None, public_key: VerifyKey = None,
                  seed: Optional[str] = None, fingerprint: Optional[TransportableData] = None):
         super().__init__(meta=meta, version=version, public_key=public_key, seed=seed, fingerprint=fingerprint)
@@ -149,7 +150,7 @@ class BTCMeta(BaseMeta):
 
 class ETHMeta(BaseMeta):
 
-    def __init__(self, meta: Dict = None,
+    def __init__(self, meta: Mapping = None,
                  version: str = None, public_key: VerifyKey = None,
                  seed: Optional[str] = None, fingerprint: Optional[TransportableData] = None):
         super().__init__(meta=meta, version=version, public_key=public_key, seed=seed, fingerprint=fingerprint)
@@ -213,7 +214,7 @@ class BaseMetaFactory(MetaFactory):
         return out
 
     # Override
-    def parse_meta(self, meta: Dict) -> Optional[Meta]:
+    def parse_meta(self, meta: Mapping) -> Optional[Meta]:
         # check 'type', 'key', 'seed', 'fingerprint'
         if 'type' not in meta or 'key' not in meta:
             # meta.type should not be empty

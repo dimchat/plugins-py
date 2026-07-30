@@ -28,7 +28,8 @@
 # SOFTWARE.
 # ==============================================================================
 
-from typing import Optional, Dict
+from collections.abc import Mapping
+from typing import Optional
 
 from dimp import TransportableData
 from dimp import DocumentType
@@ -82,7 +83,7 @@ class GeneralDocumentFactory(DocumentFactory):
             return BaseDocument(doc_type=doc_type, data=data, signature=signature)
 
     # Override
-    def parse_document(self, document: Dict) -> Optional[Document]:
+    def parse_document(self, document: Mapping) -> Optional[Document]:
         # check 'did', 'data', 'signature'
         if 'data' not in document or 'signature' not in document:
             # document.data should not be empty

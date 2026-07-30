@@ -28,7 +28,8 @@
 # SOFTWARE.
 # ==============================================================================
 
-from typing import Optional, Union, Dict
+from collections.abc import Mapping
+from typing import Optional, Union
 
 from dimp import Content, ContentFactory
 from dimp import Command, CommandFactory
@@ -45,7 +46,7 @@ from dimp import CommandExtension, CmdExtension, shared_message_extensions
 class GeneralCommandFactory(ContentFactory, CommandFactory):
 
     # Override
-    def parse_content(self, content: Dict) -> Optional[Content]:
+    def parse_content(self, content: Mapping) -> Optional[Content]:
         # get factory by command name
         cmd = get_cmd(content=content)
         factory = None if cmd is None else get_command_factory(cmd=cmd)
@@ -58,7 +59,7 @@ class GeneralCommandFactory(ContentFactory, CommandFactory):
         return factory.parse_command(content=content)
 
     # Override
-    def parse_command(self, content: Dict) -> Optional[Command]:
+    def parse_command(self, content: Mapping) -> Optional[Command]:
         # check 'sn', 'command'
         if 'sn' not in content or 'command' not in content:
             # content.sn should not be empty
@@ -71,7 +72,7 @@ class GeneralCommandFactory(ContentFactory, CommandFactory):
 class HistoryCommandFactory(GeneralCommandFactory):
 
     # Override
-    def parse_command(self, content: Dict) -> Optional[Command]:
+    def parse_command(self, content: Mapping) -> Optional[Command]:
         # check 'sn', 'command', 'time'
         if 'sn' not in content or 'command' not in content or 'time' not in content:
             # content.sn should not be empty
@@ -85,7 +86,7 @@ class HistoryCommandFactory(GeneralCommandFactory):
 class GroupCommandFactory(HistoryCommandFactory):
 
     # Override
-    def parse_content(self, content: Dict) -> Optional[Content]:
+    def parse_content(self, content: Mapping) -> Optional[Content]:
         # get factory by command name
         cmd = get_cmd(content=content)
         factory = cmd if cmd is None else get_command_factory(cmd=cmd)
@@ -94,7 +95,7 @@ class GroupCommandFactory(HistoryCommandFactory):
         return factory.parse_command(content=content)
 
     # Override
-    def parse_command(self, content: Dict) -> Optional[Command]:
+    def parse_command(self, content: Mapping) -> Optional[Command]:
         # check 'sn', 'command', 'group
         if 'sn' not in content or 'command' not in content or 'group' not in content:
             # content.sn should not be empty
@@ -105,7 +106,7 @@ class GroupCommandFactory(HistoryCommandFactory):
         return BaseGroupCommand(content=content)
 
 
-def get_cmd(content: Dict, default: Optional[str] = None) -> Optional[str]:
+def get_cmd(content: Mapping, default: Optional[str] = None) -> Optional[str]:
     ext = command_extensions()
     helper = ext.cmd_helper
     return helper.get_cmd(content=content, default=default)

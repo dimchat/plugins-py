@@ -30,7 +30,8 @@
     TED, PNF
 """
 
-from typing import Optional, Dict
+from collections.abc import Mapping
+from typing import Optional
 
 from dimp import DecryptKey
 from dimp import URI, DataURI
@@ -61,7 +62,7 @@ class BaseNetworkFileFactory(TransportableFileFactory):
         return PortableNetworkFile(None, data=data, filename=filename, url=url, password=password)
 
     # Override
-    def parse_transportable_file(self, pnf: Dict) -> Optional[TransportableFile]:
+    def parse_transportable_file(self, pnf: Mapping) -> Optional[TransportableFile]:
         # check 'data', 'URL', 'filename'
         if 'data' in pnf or 'URL' in pnf or 'filename' in pnf:
             return PortableNetworkFile(dictionary=pnf)

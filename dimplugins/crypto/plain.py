@@ -23,7 +23,8 @@
 # SOFTWARE.
 # ==============================================================================
 
-from typing import Optional, Dict
+from collections.abc import Mapping, MutableMapping
+from typing import Optional
 
 from dimp import SymmetricAlgorithms
 from dimp import SymmetricKey, SymmetricKeyFactory
@@ -39,7 +40,7 @@ class PlainKey(BaseSymmetricKey):
         which will do nothing when en/decoding message data
     """
 
-    # def __init__(self, key: Dict):
+    # def __init__(self, key: Mapping):
     #     super().__init__(key)
 
     @classmethod
@@ -58,11 +59,11 @@ class PlainKey(BaseSymmetricKey):
         return PlainData.zero()
 
     # Override
-    def encrypt(self, plaintext: bytes, extra: Optional[Dict] = None) -> bytes:
+    def encrypt(self, plaintext: bytes, extra: Optional[MutableMapping] = None) -> bytes:
         return plaintext
 
     # Override
-    def decrypt(self, ciphertext: bytes, params: Optional[Dict] = None) -> Optional[bytes]:
+    def decrypt(self, ciphertext: bytes, params: Optional[Mapping] = None) -> Optional[bytes]:
         return ciphertext
 
 
@@ -82,7 +83,7 @@ class PlainKeyFactory(SymmetricKeyFactory):
         return PlainKey.new_key()
 
     # Override
-    def parse_symmetric_key(self, key: Dict) -> Optional[SymmetricKey]:
+    def parse_symmetric_key(self, key: Mapping) -> Optional[SymmetricKey]:
         # check 'algorithm'
         algorithm = BaseKey.get_key_algorithm(key=key)
         if algorithm != SymmetricAlgorithms.PLAIN:
