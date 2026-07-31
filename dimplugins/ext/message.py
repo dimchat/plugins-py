@@ -28,9 +28,10 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import Mapping
-from typing import Optional, Any, Dict
+from collections.abc import MutableMapping
+from typing import Optional, Any
 
+from dimp import StrMap
 from dimp import DateTime, Converter, Wrapper
 from dimp import ID
 from dimp import Content, ContentFactory
@@ -47,13 +48,24 @@ from dimp import SecureMessageHelper
 from dimp import ReliableMessageHelper
 
 
+"""
+    Generic for Content Factory
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+try:
+    ContentFactoryMap = MutableMapping[str, ContentFactory]
+except TypeError:
+    import typing
+    ContentFactoryMap = typing.MutableMapping[str, ContentFactory]
+
+
 class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
                             InstantMessageHelper, SecureMessageHelper, ReliableMessageHelper):
 
     def __init__(self):
         super().__init__()
         # int(msg_type) -> content factory
-        self.__content_factories: Dict[str, ContentFactory] = {}
+        self.__content_factories: ContentFactoryMap = {}
         # envelope factory
         self.__envelope_factory: Optional[EnvelopeFactory] = None
         # message factories
@@ -62,7 +74,7 @@ class MessageGeneralFactory(GeneralMessageHelper, ContentHelper, EnvelopeHelper,
         self.__reliable_message_factory: Optional[ReliableMessageFactory] = None
 
     # Override
-    def get_content_type(self, content: Mapping, default: Optional[str] = None) -> Optional[str]:
+    def get_content_type(self, content: StrMap, default: Optional[str] = None) -> Optional[str]:
         value = content.get('type')
         return Converter.get_str(value=value, default=default)
 

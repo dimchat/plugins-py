@@ -23,9 +23,10 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import Mapping, MutableMapping
 from typing import Optional
 
+from dimp import final
+from dimp import StrMap, MutableStrMap
 from dimp import SymmetricAlgorithms
 from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import TransportableData
@@ -34,13 +35,14 @@ from dimp import PlainData
 from .keys import BaseKey, BaseSymmetricKey
 
 
+@final
 class PlainKey(BaseSymmetricKey):
     """
         Symmetric key for broadcast message,
         which will do nothing when en/decoding message data
     """
 
-    # def __init__(self, key: Mapping):
+    # def __init__(self, key: StrMap):
     #     super().__init__(key)
 
     @classmethod
@@ -59,11 +61,11 @@ class PlainKey(BaseSymmetricKey):
         return PlainData.zero()
 
     # Override
-    def encrypt(self, plaintext: bytes, extra: Optional[MutableMapping] = None) -> bytes:
+    def encrypt(self, plaintext: bytes, extra: Optional[MutableStrMap] = None) -> bytes:
         return plaintext
 
     # Override
-    def decrypt(self, ciphertext: bytes, params: Optional[Mapping] = None) -> Optional[bytes]:
+    def decrypt(self, ciphertext: bytes, params: Optional[StrMap] = None) -> Optional[bytes]:
         return ciphertext
 
 
@@ -73,6 +75,7 @@ class PlainKey(BaseSymmetricKey):
 """
 
 
+@final
 class PlainKeyFactory(SymmetricKeyFactory):
 
     # def __init__(self):
@@ -83,7 +86,7 @@ class PlainKeyFactory(SymmetricKeyFactory):
         return PlainKey.new_key()
 
     # Override
-    def parse_symmetric_key(self, key: Mapping) -> Optional[SymmetricKey]:
+    def parse_symmetric_key(self, key: StrMap) -> Optional[SymmetricKey]:
         # check 'algorithm'
         algorithm = BaseKey.get_key_algorithm(key=key)
         if algorithm != SymmetricAlgorithms.PLAIN:

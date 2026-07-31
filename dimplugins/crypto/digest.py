@@ -34,10 +34,12 @@ import hashlib
 
 from Crypto.Hash import keccak
 
+from dimp import final
 from dimp import MessageDigester
 from dimp import SHA256, KECCAK256, RIPEMD160
 
 
+@final
 class SHA256Digester(MessageDigester):
 
     # Override
@@ -47,6 +49,7 @@ class SHA256Digester(MessageDigester):
         return hash_obj.digest()
 
 
+@final
 class KECCAK256Digester(MessageDigester):
 
     # Override
@@ -57,6 +60,7 @@ class KECCAK256Digester(MessageDigester):
         return hash_obj.digest()
 
 
+@final
 class RIPEMD160Digester(MessageDigester):
 
     # Override

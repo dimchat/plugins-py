@@ -28,9 +28,10 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import Mapping
-from typing import Optional, Union, Any, Dict
+from collections.abc import MutableMapping
+from typing import Optional, Union, Any
 
+from dimp import StrMap
 from dimp import Wrapper, Converter
 from dimp import Command, CommandFactory
 from dimp import ContentFactory
@@ -38,14 +39,25 @@ from dimp import CommandHelper, GeneralCommandHelper
 from dimp import ContentExtension, GeneralMessageExtension, shared_message_extensions
 
 
+"""
+    Generic for Command Factory
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+try:
+    CommandFactoryMap = MutableMapping[str, CommandFactory]
+except TypeError:
+    import typing
+    CommandFactoryMap = typing.MutableMapping[str, CommandFactory]
+
+
 class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
 
     def __init__(self):
         super().__init__()
-        self.__command_factories: Dict[str, CommandFactory] = {}
+        self.__command_factories: CommandFactoryMap = {}
 
     # Override
-    def get_cmd(self, content: Mapping, default: Optional[str] = None) -> Optional[str]:
+    def get_cmd(self, content: StrMap, default: Optional[str] = None) -> Optional[str]:
         cmd = content.get('command')
         return Converter.get_str(value=cmd, default=default)
 
@@ -84,7 +96,7 @@ class CommandGeneralFactory(GeneralCommandHelper, CommandHelper):
         return factory.parse_command(content=info)
 
 
-def default_factory(info: Mapping) -> Optional[CommandFactory]:
+def default_factory(info: StrMap) -> Optional[CommandFactory]:
     """ get factory by content type """
     msg_type = get_content_type(content=info)
     if msg_type is not None:
@@ -94,7 +106,7 @@ def default_factory(info: Mapping) -> Optional[CommandFactory]:
     assert False, f'cannot parse command: {info}'
 
 
-def get_content_type(content: Mapping, default: Optional[str] = None) -> Optional[str]:
+def get_content_type(content: StrMap, default: Optional[str] = None) -> Optional[str]:
     ext = message_extensions()
     helper = ext.helper
     return helper.get_content_type(content=content, default=default)

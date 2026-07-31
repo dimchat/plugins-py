@@ -28,9 +28,10 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import Mapping
-from typing import Optional, Any, Dict
+from collections.abc import MutableMapping
+from typing import Optional, Any
 
+from dimp import StrMap
 from dimp import Converter, Wrapper
 from dimp import TransportableData
 from dimp import SignKey, VerifyKey
@@ -46,6 +47,19 @@ from dimp import MetaHelper, DocumentHelper
 from dimp import GeneralAccountHelper
 
 
+"""
+    Generic for Meta/Document Factories
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+try:
+    MetaFactoryMap = MutableMapping[str, MetaFactory]
+    DocumentFactoryMap = MutableMapping[str, DocumentFactory]
+except TypeError:
+    import typing
+    MetaFactoryMap = typing.MutableMapping[str, MetaFactory]
+    DocumentFactoryMap = typing.MutableMapping[str, DocumentFactory]
+
+
 class AccountGeneralFactory(GeneralAccountHelper,
                             AddressHelper, IDHelper,
                             MetaHelper, DocumentHelper):
@@ -58,18 +72,18 @@ class AccountGeneralFactory(GeneralAccountHelper,
         # IDFactory
         self.__id_factory: Optional[IDFactory] = None
         # str(type) -> MetaFactory
-        self.__meta_factories: Dict[str, MetaFactory] = {}
+        self.__meta_factories: MetaFactoryMap = {}
         # str(type) -> DocumentFactory
-        self.__docs_factories: Dict[str, DocumentFactory] = {}
+        self.__docs_factories: DocumentFactoryMap = {}
 
     # Override
-    def get_meta_type(self, meta: Mapping, default: Optional[str] = None) -> Optional[str]:
+    def get_meta_type(self, meta: StrMap, default: Optional[str] = None) -> Optional[str]:
         """ get meta type(version) """
         value = meta.get('type')
         return Converter.get_str(value=value, default=default)
 
     # Override
-    def get_document_type(self, document: Mapping, default: Optional[str] = None) -> Optional[str]:
+    def get_document_type(self, document: StrMap, default: Optional[str] = None) -> Optional[str]:
         value = document.get('type')
         if value is not None:
             return Converter.get_str(value=value, default=default)
@@ -88,7 +102,7 @@ class AccountGeneralFactory(GeneralAccountHelper,
             return DocumentType.PROFILE
 
     # Override
-    def get_document_id(self, document: Mapping) -> Optional[ID]:
+    def get_document_id(self, document: StrMap) -> Optional[ID]:
         did = document.get('did')
         return ID.parse(identifier=did)
 

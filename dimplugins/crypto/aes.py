@@ -24,11 +24,12 @@
 # ==============================================================================
 
 import random
-from collections.abc import Mapping, MutableMapping
 from typing import Optional
 
 from Crypto.Cipher import AES
 
+from dimp import final
+from dimp import StrMap, MutableStrMap
 from dimp import SymmetricAlgorithms
 from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import TransportableData
@@ -48,7 +49,7 @@ class AESKey(BaseSymmetricKey):
 
     AES_CBC_PKCS7 = "AES/CBC/PKCS7Padding"
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
         # TODO: check algorithm parameters
         #   1. check mode = 'CBC'
@@ -108,7 +109,7 @@ class AESKey(BaseSymmetricKey):
             self.__data = ted
         return ted
 
-    def _get_init_vector(self, params: Optional[Mapping]) -> Optional[bytes]:
+    def _get_init_vector(self, params: Optional[StrMap]) -> Optional[bytes]:
         """ get IV from params """
         # get base64 encoded IV from params
         if params is None:
@@ -135,7 +136,7 @@ class AESKey(BaseSymmetricKey):
         #           b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0'
         return self.block_size * chr(0).encode('utf-8')
 
-    def _new_init_vector(self, extra: Optional[MutableMapping]) -> bytes:
+    def _new_init_vector(self, extra: Optional[MutableStrMap]) -> bytes:
         # random IV data
         iv = random_bytes(size=self.block_size)
         # put encoded IV into extra
@@ -148,7 +149,7 @@ class AESKey(BaseSymmetricKey):
         return iv
 
     # Override
-    def encrypt(self, plaintext: bytes, extra: Optional[MutableMapping] = None) -> bytes:
+    def encrypt(self, plaintext: bytes, extra: Optional[MutableStrMap] = None) -> bytes:
         # 1. if 'IV' not found in extra params, new a random 'IV'
         key_iv = self._get_init_vector(params=extra)
         if key_iv is None:
@@ -162,7 +163,7 @@ class AESKey(BaseSymmetricKey):
         return key.encrypt(data)
 
     # Override
-    def decrypt(self, ciphertext: bytes, params: Optional[Mapping] = None) -> Optional[bytes]:
+    def decrypt(self, ciphertext: bytes, params: Optional[StrMap] = None) -> Optional[bytes]:
         # 1. if 'IV' not found in extra params, use an empty 'IV'
         key_iv = self._get_init_vector(params=params)
         if key_iv is None:
@@ -201,6 +202,7 @@ def pkcs7_unpad(data: bytes) -> bytes:
 """
 
 
+@final
 class AESKeyFactory(SymmetricKeyFactory):
 
     # Override
@@ -208,7 +210,7 @@ class AESKeyFactory(SymmetricKeyFactory):
         return AESKey.new_key()
 
     # Override
-    def parse_symmetric_key(self, key: Mapping) -> Optional[SymmetricKey]:
+    def parse_symmetric_key(self, key: StrMap) -> Optional[SymmetricKey]:
         # check 'data'
         if 'data' not in key:
             # key.data should not be empty

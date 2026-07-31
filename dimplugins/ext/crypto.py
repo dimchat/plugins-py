@@ -23,9 +23,10 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import Mapping
-from typing import Optional, Any, Dict
+from collections.abc import MutableMapping
+from typing import Optional, Any
 
+from dimp import StrMap
 from dimp import Converter, Wrapper
 from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import PublicKey, PublicKeyFactory
@@ -36,20 +37,35 @@ from dimp import SymmetricKeyHelper
 from dimp import PrivateKeyHelper, PublicKeyHelper
 
 
+"""
+    Generic for Crypto Key Factories
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+try:
+    SymmetricKeyFactoryMap = MutableMapping[str, SymmetricKeyFactory]
+    PrivateKeyFactoryMap = MutableMapping[str, PrivateKeyFactory]
+    PublicKeyFactoryMap = MutableMapping[str, PublicKeyFactory]
+except TypeError:
+    import typing
+    SymmetricKeyFactoryMap = typing.MutableMapping[str, SymmetricKeyFactory]
+    PrivateKeyFactoryMap = typing.MutableMapping[str, PrivateKeyFactory]
+    PublicKeyFactoryMap = typing.MutableMapping[str, PublicKeyFactory]
+
+
 class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
                                     PrivateKeyHelper, PublicKeyHelper):
 
     def __init__(self):
         super().__init__()
         # str(algorithm) -> SymmetricKey.Factory
-        self.__symmetric_key_factories: Dict[str, SymmetricKeyFactory] = {}
+        self.__symmetric_key_factories: SymmetricKeyFactoryMap = {}
         # str(algorithm) -> PublicKey.Factory
-        self.__public_key_factories: Dict[str, PublicKeyFactory] = {}
+        self.__public_key_factories: PublicKeyFactoryMap = {}
         # str(algorithm) -> PrivateKey.Factory
-        self.__private_key_factories: Dict[str, PrivateKeyFactory] = {}
+        self.__private_key_factories: PrivateKeyFactoryMap = {}
 
     # Override
-    def get_key_algorithm(self, key: Mapping, default: Optional[str] = None) -> Optional[str]:
+    def get_key_algorithm(self, key: StrMap, default: Optional[str] = None) -> Optional[str]:
         """ get key algorithm name """
         value = key.get('algorithm')
         return Converter.get_str(value=value, default=default)

@@ -26,6 +26,7 @@
 from collections.abc import Mapping
 from typing import Optional, Any
 
+from dimp import StrMap
 from dimp import URI, Mapper, Wrapper
 from dimp import DecryptKey
 from dimp import JSONMap
@@ -105,7 +106,7 @@ class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
         return factory.parse_transportable_file(info)
 
     # noinspection PyMethodMayBeStatic
-    def _get_transportable_file_content(self, pnf: Any) -> Optional[Mapping]:
+    def _get_transportable_file_content(self, pnf: Any) -> Optional[StrMap]:
         if isinstance(pnf, Mapper):
             return pnf.to_map()
         elif isinstance(pnf, Mapping):

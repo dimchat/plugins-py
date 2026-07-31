@@ -24,8 +24,8 @@
 # ==============================================================================
 
 from abc import ABC
-from collections.abc import Mapping
 
+from dimp import StrMap
 from dimp import Mapper, Dictionary
 from dimp import CryptographyKey, EncryptKey, DecryptKey, SignKey, VerifyKey
 from dimp import SymmetricKey, AsymmetricKey, PublicKey, PrivateKey
@@ -42,7 +42,7 @@ from dimp import GeneralCryptoExtension, shared_crypto_extensions
 # noinspection PyAbstractClass
 class BaseKey(Dictionary, CryptographyKey, ABC):
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
 
     @property  # Override
@@ -55,7 +55,7 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
     #
 
     @classmethod
-    def get_key_algorithm(cls, key: Mapping) -> str:
+    def get_key_algorithm(cls, key: StrMap) -> str:
         helper = crypto_helper()
         algorithm = helper.get_key_algorithm(key=key)
         return '' if algorithm is None else algorithm
@@ -101,7 +101,7 @@ def crypto_helper() -> GeneralCryptoHelper:
 # noinspection PyAbstractClass
 class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
 
     # Override
@@ -141,7 +141,7 @@ class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
 # noinspection PyAbstractClass
 class BaseAsymmetricKey(Dictionary, AsymmetricKey, ABC):
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
 
     @property  # Override
@@ -153,7 +153,7 @@ class BaseAsymmetricKey(Dictionary, AsymmetricKey, ABC):
 # noinspection PyAbstractClass
 class BasePublicKey(Dictionary, PublicKey, ABC):
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
 
     @property  # Override
@@ -169,7 +169,7 @@ class BasePublicKey(Dictionary, PublicKey, ABC):
 # noinspection PyAbstractClass
 class BasePrivateKey(Dictionary, PrivateKey, ABC):
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
 
     # Override

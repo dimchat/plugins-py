@@ -23,7 +23,6 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import Mapping
 from typing import Optional
 
 from dimp import *
@@ -141,7 +140,7 @@ class ContentParser(ContentFactory):
         self.__class = content_class
 
     # Override
-    def parse_content(self, content: Mapping) -> Optional[Content]:
+    def parse_content(self, content: StrMap) -> Optional[Content]:
         # return self.__class(content=content)
         return self.__class(content)
 
@@ -153,6 +152,6 @@ class CommandParser(CommandFactory):
         self.__class = command_class
 
     # Override
-    def parse_command(self, content: Mapping) -> Optional[Command]:
+    def parse_command(self, content: StrMap) -> Optional[Command]:
         # return self.__class(content=content)
         return self.__class(content)

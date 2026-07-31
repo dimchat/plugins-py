@@ -36,11 +36,13 @@ import json
 import base64
 import base58
 
+from dimp import final
 from dimp import DataCoder, Hex, Base58, Base64
 from dimp import ObjectCoder, JSON
 from dimp import StringCoder, UTF8
 
 
+@final
 class Base64Coder(DataCoder):
 
     # Override
@@ -54,6 +56,7 @@ class Base64Coder(DataCoder):
         return base64.b64decode(string)
 
 
+@final
 class Base58Coder(DataCoder):
 
     # Override
@@ -67,6 +70,7 @@ class Base58Coder(DataCoder):
         return base58.b58decode(string)
 
 
+@final
 class HexCoder(DataCoder):
 
     # Override
@@ -82,6 +86,7 @@ class HexCoder(DataCoder):
         return bytes.fromhex(string)
 
 
+@final
 class JSONCoder(ObjectCoder):
 
     # Override
@@ -95,6 +100,7 @@ class JSONCoder(ObjectCoder):
         return json.loads(string)
 
 
+@final
 class UTF8Coder(StringCoder):
 
     # Override

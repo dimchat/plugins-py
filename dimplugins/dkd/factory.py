@@ -30,9 +30,9 @@
 
 import random
 import threading
-from collections.abc import Mapping
 from typing import Optional
 
+from dimp import StrMap
 from dimp import DateTime
 from dimp import ID
 from dimp import Content, Envelope
@@ -70,7 +70,7 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
         return MessageEnvelope(sender=sender, receiver=receiver, time=time)
 
     # Override
-    def parse_envelope(self, envelope: Mapping) -> Optional[Envelope]:
+    def parse_envelope(self, envelope: StrMap) -> Optional[Envelope]:
         # check 'sender'
         if 'sender' not in envelope:
             # env.sender should not empty
@@ -94,7 +94,7 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
         return PlainMessage(head=head, body=body)
 
     # Override
-    def parse_instant_message(self, msg: Mapping) -> Optional[InstantMessage]:
+    def parse_instant_message(self, msg: StrMap) -> Optional[InstantMessage]:
         # check 'sender', 'content'
         if 'sender' not in msg or 'content' not in msg:
             # msg.sender should not be empty
@@ -108,7 +108,7 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
     #
 
     # Override
-    def parse_secure_message(self, msg: Mapping) -> Optional[SecureMessage]:
+    def parse_secure_message(self, msg: StrMap) -> Optional[SecureMessage]:
         # check 'sender', 'data'
         if 'sender' not in msg or 'data' not in msg:
             # msg.sender should not be empty
@@ -125,7 +125,7 @@ class MessageFactory(EnvelopeFactory, InstantMessageFactory, SecureMessageFactor
     #
 
     # Override
-    def parse_reliable_message(self, msg: Mapping) -> Optional[ReliableMessage]:
+    def parse_reliable_message(self, msg: StrMap) -> Optional[ReliableMessage]:
         # check 'sender', 'data', 'signature'
         if 'sender' not in msg or 'data' not in msg or 'signature' not in msg:
             # msg.sender should not be empty

@@ -23,7 +23,6 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import Mapping, MutableMapping
 from typing import Optional, Union
 
 from Crypto.Hash import SHA256
@@ -31,6 +30,8 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5 as Cipher_PKCS1_v1_5
 from Crypto.Signature import PKCS1_v1_5 as Signature_PKCS1_v1_5
 
+from dimp import final
+from dimp import StrMap, MutableStrMap
 from dimp import AsymmetricAlgorithms
 from dimp import EncryptKey, DecryptKey
 from dimp import PublicKey, PublicKeyFactory
@@ -44,7 +45,7 @@ from .keys import BaseKey, BasePublicKey, BasePrivateKey
 class RSAPublicKey(BasePublicKey, EncryptKey):
     """ RSA Public Key """
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
         # lazy load
         self.__key: Optional[RSA.RsaKey] = None
@@ -85,7 +86,7 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
             return int(bits)
 
     # Override
-    def encrypt(self, plaintext: bytes, extra: Optional[MutableMapping] = None) -> bytes:
+    def encrypt(self, plaintext: bytes, extra: Optional[MutableStrMap] = None) -> bytes:
         cipher = Cipher_PKCS1_v1_5.new(self.rsa_key)
         return cipher.encrypt(plaintext)
 
@@ -104,7 +105,7 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
 class RSAPrivateKey(BasePrivateKey, DecryptKey):
     """ RSA Private Key """
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
         # lazy load
         self.__key: Optional[RSA.RsaKey] = None
@@ -181,7 +182,7 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
         return key
 
     # Override
-    def decrypt(self, ciphertext: bytes, params: Optional[Mapping] = None) -> Optional[bytes]:
+    def decrypt(self, ciphertext: bytes, params: Optional[StrMap] = None) -> Optional[bytes]:
         sentinel: Optional[bytes] = None
         try:
             cipher = Cipher_PKCS1_v1_5.new(self.rsa_key)
@@ -206,10 +207,11 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
 """
 
 
+@final
 class RSAPublicKeyFactory(PublicKeyFactory):
 
     # Override
-    def parse_public_key(self, key: Mapping) -> Optional[PublicKey]:
+    def parse_public_key(self, key: StrMap) -> Optional[PublicKey]:
         # check 'data'
         if 'data' not in key:
             # key.data should not be empty
@@ -218,6 +220,7 @@ class RSAPublicKeyFactory(PublicKeyFactory):
         return RSAPublicKey(key)
 
 
+@final
 class RSAPrivateKeyFactory(PrivateKeyFactory):
 
     # Override
@@ -225,7 +228,7 @@ class RSAPrivateKeyFactory(PrivateKeyFactory):
         return RSAPrivateKey.new_key()
 
     # Override
-    def parse_private_key(self, key: Mapping) -> Optional[PrivateKey]:
+    def parse_private_key(self, key: StrMap) -> Optional[PrivateKey]:
         # check 'data'
         if 'data' not in key:
             # key.data should not be empty

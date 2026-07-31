@@ -24,11 +24,12 @@
 # ==============================================================================
 
 import hashlib
-from collections.abc import Mapping
 from typing import Optional, Union
 
 import ecdsa
 
+from dimp import final
+from dimp import StrMap
 from dimp import AsymmetricAlgorithms
 from dimp import PublicKey, PublicKeyFactory
 from dimp import PrivateKey, PrivateKeyFactory
@@ -41,7 +42,7 @@ from .keys import BasePublicKey, BasePrivateKey
 class ECCPublicKey(BasePublicKey):
     """ ECC Public Key """
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
         # lazy load
         self.__key: Optional[ecdsa.VerifyingKey] = None
@@ -119,7 +120,7 @@ class ECCPublicKey(BasePublicKey):
 class ECCPrivateKey(BasePrivateKey):
     """ ECC Private Key """
 
-    def __init__(self, key: Mapping):
+    def __init__(self, key: StrMap):
         super().__init__(key)
         # lazy load
         self.__key: Optional[ecdsa.SigningKey] = None
@@ -221,10 +222,11 @@ class ECCPrivateKey(BasePrivateKey):
 """
 
 
+@final
 class ECCPublicKeyFactory(PublicKeyFactory):
 
     # Override
-    def parse_public_key(self, key: Mapping) -> Optional[PublicKey]:
+    def parse_public_key(self, key: StrMap) -> Optional[PublicKey]:
         # check 'data'
         if 'data' not in key:
             # key.data should not be empty
@@ -233,6 +235,7 @@ class ECCPublicKeyFactory(PublicKeyFactory):
         return ECCPublicKey(key)
 
 
+@final
 class ECCPrivateKeyFactory(PrivateKeyFactory):
 
     # Override
@@ -240,7 +243,7 @@ class ECCPrivateKeyFactory(PrivateKeyFactory):
         return ECCPrivateKey.new_key()
 
     # Override
-    def parse_private_key(self, key: Mapping) -> Optional[PrivateKey]:
+    def parse_private_key(self, key: StrMap) -> Optional[PrivateKey]:
         # check 'data'
         if 'data' not in key:
             # key.data should not be empty
