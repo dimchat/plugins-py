@@ -28,7 +28,6 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import MutableMapping
 from typing import Optional, Any
 
 from dimp import StrMap
@@ -53,7 +52,8 @@ from dimp import ReliableMessageHelper
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 try:
-    ContentFactoryMap = MutableMapping[str, ContentFactory]
+    import collections.abc as abc
+    ContentFactoryMap = abc.MutableMapping[str, ContentFactory]
 except TypeError:
     import typing
     ContentFactoryMap = typing.MutableMapping[str, ContentFactory]

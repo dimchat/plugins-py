@@ -23,7 +23,6 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import MutableMapping
 from typing import Optional, Any
 
 from dimp import StrMap
@@ -42,9 +41,10 @@ from dimp import PrivateKeyHelper, PublicKeyHelper
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 try:
-    SymmetricKeyFactoryMap = MutableMapping[str, SymmetricKeyFactory]
-    PrivateKeyFactoryMap = MutableMapping[str, PrivateKeyFactory]
-    PublicKeyFactoryMap = MutableMapping[str, PublicKeyFactory]
+    import collections.abc as abc
+    SymmetricKeyFactoryMap = abc.MutableMapping[str, SymmetricKeyFactory]
+    PrivateKeyFactoryMap = abc.MutableMapping[str, PrivateKeyFactory]
+    PublicKeyFactoryMap = abc.MutableMapping[str, PublicKeyFactory]
 except TypeError:
     import typing
     SymmetricKeyFactoryMap = typing.MutableMapping[str, SymmetricKeyFactory]

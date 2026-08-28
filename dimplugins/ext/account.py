@@ -28,7 +28,6 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import MutableMapping
 from typing import Optional, Any
 
 from dimp import StrMap
@@ -52,8 +51,9 @@ from dimp import GeneralAccountHelper
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 try:
-    MetaFactoryMap = MutableMapping[str, MetaFactory]
-    DocumentFactoryMap = MutableMapping[str, DocumentFactory]
+    import collections.abc as abc
+    MetaFactoryMap = abc.MutableMapping[str, MetaFactory]
+    DocumentFactoryMap = abc.MutableMapping[str, DocumentFactory]
 except TypeError:
     import typing
     MetaFactoryMap = typing.MutableMapping[str, MetaFactory]

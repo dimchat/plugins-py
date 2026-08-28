@@ -28,7 +28,6 @@
 # SOFTWARE.
 # ==============================================================================
 
-from collections.abc import MutableMapping
 from typing import Optional, Union, Any
 
 from dimp import StrMap
@@ -44,7 +43,8 @@ from dimp import ContentExtension, GeneralMessageExtension, shared_message_exten
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 try:
-    CommandFactoryMap = MutableMapping[str, CommandFactory]
+    import collections.abc as abc
+    CommandFactoryMap = abc.MutableMapping[str, CommandFactory]
 except TypeError:
     import typing
     CommandFactoryMap = typing.MutableMapping[str, CommandFactory]
