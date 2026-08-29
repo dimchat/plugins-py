@@ -20,13 +20,13 @@ with io.open('README.md', 'r', encoding='utf-8') as fh:
     readme = fh.read()
 
 setup(
-    name='dimplugins',
+    name='dimap',
     version=__version__,
-    url='https://github.com/dimchat/sdk-py',
+    url='https://github.com/dimchat/plugins-py',
     license='MIT',
     author=__author__,
     author_email=__contact__,
-    description='Decentralized Instant Messaging (Python Plugins)',
+    description='DIM Algorithm Plugins',
     long_description=readme,
     long_description_content_type='text/markdown',
     packages=find_packages(),

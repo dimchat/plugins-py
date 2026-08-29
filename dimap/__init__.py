@@ -24,9 +24,10 @@
 # ==============================================================================
 
 """
-    Decentralized Instant Messaging (Python Plugins)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    DIM-AP
+    ~~~~~~
 
+    Decentralized Instant Messaging Algorithm Plugins
 """
 
 from dimp.ext import *
@@ -39,7 +40,7 @@ from .ext import *
 from .plugin_loader import PluginLoader
 
 
-name = "DIMPlugins"
+name = "DIM-AP"
 
 __author__ = 'Albert Moky'
 
