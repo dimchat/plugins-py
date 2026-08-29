@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 """
-    Decentralized Instant Messaging (Python Plugins)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    DIM Algorithm Plugins
+    ~~~~~~~~~~~~~~~~~~~~~
 
     Plugins for MingKeMing module
 """
@@ -12,7 +12,7 @@ import io
 
 from setuptools import setup, find_packages
 
-__version__ = '2.5.0'
+__version__ = '1.0.0'
 __author__ = 'Albert Moky'
 __contact__ = 'albert.moky@gmail.com'
 

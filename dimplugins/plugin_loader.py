@@ -23,6 +23,8 @@
 # SOFTWARE.
 # ==============================================================================
 
+from .plugin_core import CoreMixIn
+
 from .format.coder import CoderMixIn
 from .format.trans import TransportableMixIn
 
@@ -32,10 +34,13 @@ from .plugin_keys import CryptoMixIn
 
 
 # noinspection PyMethodMayBeStatic
-class PluginLoader(CoderMixIn, TransportableMixIn, DigestMixIn, CryptoMixIn):
+class PluginLoader(CoreMixIn, CoderMixIn, TransportableMixIn, DigestMixIn, CryptoMixIn):
 
     def load(self):
         """ Register plugins """
+        self.register_crypto_helpers()
+        self.register_format_helpers()
+
         self._load_data_coders()
 
         self._load_message_digesters()

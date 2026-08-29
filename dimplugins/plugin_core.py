@@ -31,18 +31,8 @@ from dimp import GeneralCryptoExtension, shared_crypto_extensions
 from dimp import TransportableFileExtension
 from dimp import FormatExtensions, shared_format_extensions
 
-from dimp import AddressExtension, IDExtension, MetaExtension, DocumentExtension
-from dimp import GeneralAccountExtension, shared_account_extensions
-
-from dimp import MessageExtensions, ContentExtension
-from dimp import InstantMessageExtension, SecureMessageExtension, ReliableMessageExtension
-from dimp import GeneralMessageExtension, shared_message_extensions
-
-from dimp import CommandExtension, CmdExtension
-
-from .ext import CryptographyKeyGeneralFactory, FormatGeneralFactory
-from .ext import AccountGeneralFactory
-from .ext import MessageGeneralFactory, CommandGeneralFactory
+from .ext import FormatGeneralFactory
+from .ext.crypto import CryptographyKeyGeneralFactory
 
 
 # noinspection PyMethodMayBeStatic
@@ -67,37 +57,6 @@ class CoreMixIn:
         ext.pnf_helper = helper
         ext.ted_helper = helper
 
-    # protected
-    def register_account_helpers(self):
-        # mkm
-        helper = AccountGeneralFactory()
-        ext = account_extensions()
-        ext.address_helper = helper
-        ext.id_helper = helper
-        ext.meta_helper = helper
-        ext.doc_helper = helper
-        ext.helper = helper
-
-    # protected
-    def register_message_helpers(self):
-        # dkd
-        helper = MessageGeneralFactory()
-        ext = message_extensions()
-        ext.content_helper = helper
-        ext.envelope_helper = helper
-        ext.instant_helper = helper
-        ext.secure_helper = helper
-        ext.reliable_helper = helper
-        ext.helper = helper
-
-    # protected
-    def register_command_helpers(self):
-        # cmd
-        helper = CommandGeneralFactory()
-        ext = command_extensions()
-        ext.cmd_helper = helper
-        ext.command_helper = helper
-
 
 def crypto_extensions() -> Union[SymmetricKeyExtension, PublicKeyExtension, PrivateKeyExtension,
                                  GeneralCryptoExtension]:
@@ -106,18 +65,3 @@ def crypto_extensions() -> Union[SymmetricKeyExtension, PublicKeyExtension, Priv
 
 def format_extensions() -> Union[FormatExtensions, TransportableFileExtension]:
     return shared_format_extensions
-
-
-def account_extensions() -> Union[AddressExtension, IDExtension, MetaExtension, DocumentExtension,
-                                  GeneralAccountExtension]:
-    return shared_account_extensions
-
-
-def message_extensions() -> Union[MessageExtensions, ContentExtension,
-                                  InstantMessageExtension, SecureMessageExtension, ReliableMessageExtension,
-                                  GeneralMessageExtension]:
-    return shared_message_extensions
-
-
-def command_extensions() -> Union[CommandExtension, CmdExtension]:
-    return shared_message_extensions
