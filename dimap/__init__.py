@@ -73,15 +73,8 @@ __all__ = [
 
     'GeneralMessageHelper', 'GeneralMessageExtension',
 
-    'TransportableFileHelper',
-    'TransportableFileExtension',
-    'TransportableFileWrapperExtension',
-
     'CommandHelper', 'GeneralCommandHelper',
     'CommandExtension', 'CmdExtension',
-
-    'QuoteHelper', 'QuotePurifier',
-    'QuoteExtension',
 
     ################################
     #
@@ -119,16 +112,13 @@ __all__ = [
     'JSONCoder', 'UTF8Coder',
     # 'CoderMixIn',
 
-    'BaseNetworkDataFactory', 'BaseNetworkFileFactory',
-    # 'TransportableMixIn',
-
     ################################
     #
     #   Core Extensions
     #
     ################################
 
-    'CryptographyKeyGeneralFactory', 'FormatGeneralFactory',
+    'CryptographyKeyGeneralFactory',
 
     #
     #   Loaders

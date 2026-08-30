@@ -27,9 +27,6 @@ from .coder import Base64Coder, Base58Coder, HexCoder
 from .coder import JSONCoder, UTF8Coder
 # from .coder import CoderMixIn
 
-from .trans import BaseNetworkDataFactory, BaseNetworkFileFactory
-# from .trans import TransportableMixIn
-
 
 __all__ = [
 
@@ -40,8 +37,5 @@ __all__ = [
     'Base64Coder', 'Base58Coder', 'HexCoder',
     'JSONCoder', 'UTF8Coder',
     # 'CoderMixIn',
-
-    'BaseNetworkDataFactory', 'BaseNetworkFileFactory',
-    # 'TransportableMixIn',
 
 ]

@@ -24,7 +24,6 @@
 # ==============================================================================
 
 from .crypto import CryptographyKeyGeneralFactory
-from .format import FormatGeneralFactory
 
 
 __all__ = [
@@ -33,6 +32,6 @@ __all__ = [
     #   Core Extensions
     #
 
-    'CryptographyKeyGeneralFactory', 'FormatGeneralFactory',
+    'CryptographyKeyGeneralFactory',
 
 ]
