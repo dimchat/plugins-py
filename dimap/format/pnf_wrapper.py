@@ -31,10 +31,7 @@ from dimp import Mapper, Converter
 
 from dimp import SymmetricKey, DecryptKey
 from dimp import TransportableData
-
 from dimp import TransportableFileWrapper
-from dimp import TransportableFileWrapperFactory
-from dimp import shared_format_extensions
 
 
 class PortableNetworkFileWrapper(TransportableFileWrapper):
@@ -192,37 +189,3 @@ class PortableNetworkFileWrapper(TransportableFileWrapper):
         # self.__dictionary['key'] = None if key is None else key.to_map()
         # self.set_map(key='key', value=key)
         self.__password = key
-
-
-# -----------------------------------------------------------------------------
-#  Format Extensions
-# -----------------------------------------------------------------------------
-
-
-class _PNFWrapperFactory(TransportableFileWrapperFactory):
-
-    # Override
-    def create_transportable_file_wrapper(self, content: StrMap,
-                                          data: Optional[TransportableData],
-                                          filename: Optional[str],
-                                          url: Optional[URI],
-                                          password: Optional[DecryptKey]) -> TransportableFileWrapper:
-        # create wrapper for the content
-        wrapper = PortableNetworkFileWrapper(content)
-        # file data
-        if data is not None:
-            wrapper.data = data
-        # file name
-        if filename is not None:
-            wrapper.filename = filename
-        # remote URL
-        if url is not None:
-            wrapper.url = url
-        # decrypt key
-        if password is not None:
-            wrapper.password = password
-        # OK
-        return wrapper
-
-
-shared_format_extensions.pnf_wrapper_factory = _PNFWrapperFactory()

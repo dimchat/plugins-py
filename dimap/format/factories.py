@@ -39,6 +39,9 @@ from dimp import DecryptKey
 from dimp import URI
 from dimp import TransportableData, TransportableDataFactory
 from dimp import TransportableFile, TransportableFileFactory
+from dimp import TransportableFileWrapper
+from dimp import TransportableFileWrapperFactory
+from dimp import shared_format_extensions
 
 from ..crypto import EncodeAlgorithms
 
@@ -47,6 +50,7 @@ from .embed import EmbedData
 from .base64_data import Base64Data
 
 from .pnf import PortableNetworkFile
+from .pnf_wrapper import PortableNetworkFileWrapper
 
 
 class BaseNetworkDataFactory(TransportableDataFactory):
@@ -95,6 +99,32 @@ class BaseNetworkFileFactory(TransportableFileFactory):
             return PortableNetworkFile(dictionary=pnf)
 
 
+class _PNFWrapperFactory(TransportableFileWrapperFactory):
+
+    # Override
+    def create_transportable_file_wrapper(self, content: StrMap,
+                                          data: Optional[TransportableData],
+                                          filename: Optional[str],
+                                          url: Optional[URI],
+                                          password: Optional[DecryptKey]) -> TransportableFileWrapper:
+        # create wrapper for the content
+        wrapper = PortableNetworkFileWrapper(content)
+        # file data
+        if data is not None:
+            wrapper.data = data
+        # file name
+        if filename is not None:
+            wrapper.filename = filename
+        # remote URL
+        if url is not None:
+            wrapper.url = url
+        # decrypt key
+        if password is not None:
+            wrapper.password = password
+        # OK
+        return wrapper
+
+
 # noinspection PyMethodMayBeStatic
 class TransportableMixIn:
     """ Transportable Plugins """
@@ -114,6 +144,4 @@ class TransportableMixIn:
     # protected
     def register_pnf_wrapper_factory(self):
         # PNF Wrapper
-        from .pnf_wrapper import _PNFWrapperFactory
-        from dimp import shared_format_extensions
         shared_format_extensions.pnf_wrapper_factory = _PNFWrapperFactory()

@@ -29,8 +29,8 @@ from dimp import SymmetricKeyExtension, PublicKeyExtension, PrivateKeyExtension
 from dimp import GeneralCryptoExtension, shared_crypto_extensions
 from dimp import shared_format_extensions
 
-from .ext.crypto import GeneralCryptoHelper
-from .ext.format import GeneralFormatHelper
+from .ext import GeneralCryptoHelper
+from .ext import GeneralFormatHelper
 
 
 # noinspection PyMethodMayBeStatic

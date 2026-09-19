@@ -33,8 +33,6 @@ from dimp import StrMap, MutableStrMap
 from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import TransportableData
 
-from ..format import Base64Data
-
 from .algorithms import SymmetricAlgorithms
 from .keys import BaseSymmetricKey
 
@@ -70,7 +68,7 @@ class AESKey(BaseSymmetricKey):
     def new_key(cls, size: int = 32) -> SymmetricKey:
         """ generate a new random key """
         pwd = random_bytes(size=size)
-        ted = Base64Data.create_with_bytes(binary=pwd)
+        ted = TransportableData.create(data=pwd)
         key = AESKey(key={
             'algorithm': SymmetricAlgorithms.AES,
             'data': ted.serialize(),
@@ -149,7 +147,7 @@ class AESKey(BaseSymmetricKey):
         if extra is None:
             assert False, 'extra dict must provided to store IV for AES'
         else:
-            ted = Base64Data.create_with_bytes(binary=iv)
+            ted = TransportableData.create(data=iv)
             extra['IV'] = ted.serialize()
         # OK
         return iv

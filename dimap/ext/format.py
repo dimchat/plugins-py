@@ -30,12 +30,12 @@ from dimp import StrMap
 from dimp import URI, Mapper, Wrapper
 from dimp import DecryptKey
 from dimp import JSONMap
-from dimap.format.duri import DataURI
 from dimp import TransportableData, TransportableDataFactory
 from dimp import TransportableDataHelper
-
 from dimp import TransportableFile, TransportableFileFactory
 from dimp import TransportableFileHelper
+
+from ..format import DataURI
 
 
 class GeneralFormatHelper(TransportableDataHelper, TransportableFileHelper):
