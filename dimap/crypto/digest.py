@@ -41,6 +41,10 @@ from dimp import SHA256, KECCAK256, RIPEMD160
 
 @final
 class SHA256Digester(MessageDigester):
+    """SHA-256 message digester.
+
+    Computes the SHA-256 hash of the input data (32 bytes).
+    """
 
     # Override
     def digest(self, data: bytes) -> bytes:
@@ -51,6 +55,10 @@ class SHA256Digester(MessageDigester):
 
 @final
 class KECCAK256Digester(MessageDigester):
+    """Keccak-256 message digester.
+
+    Computes the Keccak-256 hash of the input data (32 bytes).
+    """
 
     # Override
     def digest(self, data: bytes) -> bytes:
@@ -62,6 +70,10 @@ class KECCAK256Digester(MessageDigester):
 
 @final
 class RIPEMD160Digester(MessageDigester):
+    """RIPEMD-160 message digester.
+
+    Computes the RIPEMD-160 hash of the input data (20 bytes).
+    """
 
     # Override
     def digest(self, data: bytes) -> bytes:
@@ -73,19 +85,26 @@ class RIPEMD160Digester(MessageDigester):
 
 # noinspection PyMethodMayBeStatic
 class DigestMixIn:
-    """ Digest Plugins """
+    """Digest Plugins
+
+    Registers the message digesters (SHA-256, Keccak-256,
+    RIPEMD-160) into the global digester holders.
+    """
 
     # protected
     def register_sha256_digester(self):
+        """ set SHA-256 digester """
         # SHA256
         SHA256.digester = SHA256Digester()
 
     # protected
     def register_keccak256_digester(self):
+        """ set Keccak-256 digester """
         # KECCAK256
         KECCAK256.digester = KECCAK256Digester()
 
     # protected
     def register_ripemd160_digester(self):
+        """ set RipeMD-160 digester """
         # RIPEMD160
         RIPEMD160.digester = RIPEMD160Digester()

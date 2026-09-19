@@ -35,6 +35,12 @@ from dimp import TransportableFileWrapper
 
 
 class PortableNetworkFileWrapper(TransportableFileWrapper):
+    """
+    Portable Network File Wrapper
+
+    Wraps the PNF dictionary to manage the file properties:
+    file data, file name, download URL and decrypt key.
+    """
 
     def __init__(self, dictionary: StrMap):
         super().__init__()
@@ -42,7 +48,9 @@ class PortableNetworkFileWrapper(TransportableFileWrapper):
             dictionary = dictionary.to_map()
         self.__dictionary = dictionary
         # lazy load
+        # file data (not encrypted)
         self.__attachment: Optional[TransportableData] = None
+        # key to decrypt data downloaded from CDN
         self.__password: Optional[DecryptKey] = None
 
     def get_str(self, key: str, default: Optional[str] = None) -> Optional[str]:
@@ -50,6 +58,11 @@ class PortableNetworkFileWrapper(TransportableFileWrapper):
         return Converter.get_str(value=value, default=default)
 
     def set_map(self, key: str, value: Optional[Mapper]):
+        """ Set a map value into the wrapper dictionary.
+
+        :param key:   the field name.
+        :param value: the map value to set (None to remove).
+        """
         if value is None:
             self.__dictionary.pop(key, None)
         else:

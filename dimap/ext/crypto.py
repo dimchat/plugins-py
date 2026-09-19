@@ -54,6 +54,18 @@ except TypeError:
 
 class GeneralCryptoHelper(CryptoKeyHandler, SymmetricKeyHelper,
                           PrivateKeyHelper, PublicKeyHelper):
+    """ CryptographyKey General Helper
+
+    Default implementation of `CryptoKeyHandler` and the key helpers,
+    which manages the key factories by algorithm name:
+
+    - symmetric key factories (AES, PLAIN, ...)
+    - private key factories (ECC, RSA, ...)
+    - public key factories (ECC, RSA, ...)
+
+    The key factories are registered with their algorithm names,
+    and the parser/generator dispatches to them accordingly.
+    """
 
     def __init__(self):
         super().__init__()

@@ -35,6 +35,12 @@ from .plugin_keys import CryptoMixIn
 
 # noinspection PyMethodMayBeStatic
 class PluginLoader(CoreMixIn, CoderMixIn, DigestMixIn, TransportableMixIn, CryptoMixIn):
+    """ Core Plugins Loader
+
+    Loads all plugins of the DimPlugins library by registering
+    the data coders, message digesters, key factories and
+    TED/PNF factories into the corresponding extension holders.
+    """
 
     def load(self):
         """ Register plugins """
@@ -76,7 +82,7 @@ class PluginLoader(CoreMixIn, CoderMixIn, DigestMixIn, TransportableMixIn, Crypt
 
     # protected
     def _load_format_plugins(self):
-        """ Format plugins """
+        """ Load the format plugins. """
         self.register_ted_factory()
 
         self.register_pnf_factory()

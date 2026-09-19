@@ -58,13 +58,20 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
         self.__data: Optional[TransportableData] = None
 
     def key_size(self) -> int:
-        """ Get the RSA key size (bytes), default is 128 bytes (1024 bits) """
+        """Get the RSA key size (bytes).
+
+        The size is read from the 'keySize' field of the key info,
+        default is 128 bytes (1024 bits).
+        """
         # TODO: get from key
         return self.get_int(key='keySize') or 128  # 1024 / 8
 
     @property  # protected
     def rsa_key(self) -> RSA.RsaKey:
-        """ Get the native RSA public key object (decoded from 'data') """
+        """Get the native RSA public key object.
+
+        The key data (PEM encoded) is decoded from the 'data' field.
+        """
         verify_key = self.__key
         if verify_key is None:
             # data in 'PEM' format
@@ -86,6 +93,10 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
 
     # Override
     def encrypt(self, plaintext: bytes, extra: Optional[MutableStrMap] = None) -> bytes:
+        """Encrypt `plaintext` with the public key (PKCS#1).
+
+        Returns the ciphertext.
+        """
         if len(plaintext) > self.key_size() - 11:
             raise ValueError(f'RSA plain text length error: {len(plaintext)}')
         cipher = Cipher_PKCS1_v1_5.new(self.rsa_key)
@@ -93,6 +104,10 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
 
     # Override
     def verify(self, data: bytes, signature: bytes) -> bool:
+        """Verify `signature` of `data` with the public key.
+
+        Returns true if the signature is valid.
+        """
         try:
             hash_obj = SHA256.SHA256Hash(data)
             verifier = Signature_PKCS1_v1_5.new(self.rsa_key)
@@ -121,7 +136,15 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
 
     @classmethod
     def new_key(cls, bits: int = 1024) -> PrivateKey:
-        """ generate new private key """
+        """Generate a random RSA key pair.
+
+        The key data contains the private key (PEM encoded, PKCS#1),
+        with 'mode', 'padding' and 'digest' fields for the parameters.
+
+        `bits` - key size in bits, default is 1024.
+
+        Returns a new `RSAPrivateKey` instance.
+        """
         rsa_key = RSA.generate(bits=bits)
         # store private key in PKCS#1 format
         pem = rsa_key.exportKey(format='PEM', pkcs=1).decode('utf-8')
@@ -137,13 +160,20 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
         return key
 
     def key_size(self) -> int:
-        """ Get the RSA key size (bytes), default is 128 bytes (1024 bits) """
+        """Get the RSA key size (bytes).
+
+        The size is read from the 'keySize' field of the key info,
+        default is 128 bytes (1024 bits).
+        """
         # TODO: get from key
         return self.get_int(key='keySize') or 128  # 1024 / 8
 
     @property  # protected
     def rsa_key(self) -> RSA.RsaKey:
-        """ Get the native RSA private key object (decoded from 'data') """
+        """Get the native RSA private key object.
+
+        The key data (PEM encoded) is decoded from the 'data' field.
+        """
         if self.__key is None:
             # data in 'PEM' format
             data = self.get_str(key='data') or ''
@@ -169,6 +199,11 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
 
     @property  # Override
     def public_key(self) -> Union[PublicKey, EncryptKey]:
+        """Calculate RSA public key from the private key.
+
+        The public key is derived from the native RSA private key object
+        and encoded to PEM format (PKCS#1).
+        """
         pub = self.__public_key
         if pub is None:
             rsa_key = self.rsa_key
@@ -189,6 +224,10 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
 
     # Override
     def decrypt(self, ciphertext: bytes, params: Optional[StrMap] = None) -> Optional[bytes]:
+        """Decrypt `ciphertext` with the private key (PKCS#1).
+
+        Returns the plaintext.
+        """
         if len(ciphertext) != self.key_size():
             raise ValueError(f'RSA cipher text length error: {len(ciphertext)}')
         sentinel: Optional[bytes] = None
@@ -200,6 +239,10 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
 
     # Override
     def sign(self, data: bytes) -> bytes:
+        """Sign `data` with the private key.
+
+        Returns the signature.
+        """
         hash_obj = SHA256.SHA256Hash(data)
         signer = Signature_PKCS1_v1_5.new(self.rsa_key)
         return signer.sign(hash_obj)
@@ -217,6 +260,10 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
 
 @final
 class RSAPublicKeyFactory(PublicKeyFactory):
+    """RSA Public Key Factory
+
+    Parses a dictionary into an `RSAPublicKey` instance.
+    """
 
     # Override
     def parse_public_key(self, key: StrMap) -> Optional[PublicKey]:
@@ -231,6 +278,11 @@ class RSAPublicKeyFactory(PublicKeyFactory):
 
 @final
 class RSAPrivateKeyFactory(PrivateKeyFactory):
+    """RSA Private Key Factory
+
+    Generates a new `RSAPrivateKey` or parses a dictionary
+    into an `RSAPrivateKey` instance.
+    """
 
     # Override
     def generate_private_key(self) -> Optional[PrivateKey]:

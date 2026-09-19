@@ -32,7 +32,12 @@ from ..crypto import EncodeAlgorithms
 
 
 class Base64Data(BaseData):
-    """ Base-64 encoding """
+    """
+    Base-64 encoding
+
+    A `TransportableData` wrapper whose encoded string is
+    a Base-64 encoded text.
+    """
 
     @property
     def encoding(self) -> str:

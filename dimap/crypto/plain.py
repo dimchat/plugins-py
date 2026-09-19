@@ -86,6 +86,10 @@ class PlainKey(BaseSymmetricKey):
 
 @final
 class PlainKeyFactory(SymmetricKeyFactory):
+    """Plain Key Factory
+
+    Generates/parses the singleton `PlainKey` for broadcast messages.
+    """
 
     # def __init__(self):
     #     super().__init__()

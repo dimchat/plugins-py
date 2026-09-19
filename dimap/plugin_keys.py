@@ -33,10 +33,18 @@ from .crypto import RSAPublicKeyFactory, RSAPrivateKeyFactory
 
 # noinspection PyMethodMayBeStatic
 class CryptoMixIn:
-    """ Crypto Plugins """
+    """ Crypto Plugins
+
+    Registers the symmetric/asymmetric key factories
+    (AES, Plain, RSA, ECC) into the key factory holders.
+    """
 
     # protected
     def register_aes_key_factory(self):
+        """ Register the AES key factory.
+
+        Registers `AESKeyFactory` for both "AES" and "AES/CBC/PKCS7Padding".
+        """
         # Symmetric Key: AES
         factory = AESKeyFactory()
         SymmetricKey.set_factory(algorithm=SymmetricAlgorithms.AES, factory=factory)
@@ -45,12 +53,22 @@ class CryptoMixIn:
 
     # protected
     def register_plain_key_factory(self):
+        """ Register the Plain key factory.
+
+        Registers `PlainKeyFactory` for the "PLAIN" algorithm
+        (broadcast message key).
+        """
         # Symmetric Key: Plain
         factory = PlainKeyFactory()
         SymmetricKey.set_factory(algorithm=SymmetricAlgorithms.PLAIN, factory=factory)
 
     # protected
     def register_rsa_key_factories(self):
+        """ Register the RSA key factories.
+
+        Registers `RSAPublicKeyFactory` and `RSAPrivateKeyFactory`
+        for "RSA", "SHA256withRSA" and "RSA/ECB/PKCS1Padding".
+        """
         # Public Key: RSA
         rsa_pub = RSAPublicKeyFactory()
         PublicKey.set_factory(algorithm=AsymmetricAlgorithms.RSA, factory=rsa_pub)
@@ -64,6 +82,11 @@ class CryptoMixIn:
 
     # protected
     def register_ecc_key_factories(self):
+        """ Register the ECC key factories.
+
+        Registers `ECCPublicKeyFactory` and `ECCPrivateKeyFactory`
+        for "ECC" and "SHA256withECDSA".
+        """
         # Public Key: ECC
         ecc_pub = ECCPublicKeyFactory()
         PublicKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pub)

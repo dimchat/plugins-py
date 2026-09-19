@@ -41,6 +41,9 @@ from dimp import GeneralCryptoExtension, shared_crypto_extensions
 
 # noinspection PyAbstractClass
 class BaseKey(Dictionary, CryptographyKey, ABC):
+    """Provides common helper methods for key comparison and algorithm
+    detection, shared by all key types (symmetric/asymmetric).
+    """
 
     def __init__(self, key: StrMap):
         super().__init__(key)
@@ -56,23 +59,41 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
 
     @classmethod
     def get_key_algorithm(cls, key: StrMap) -> str:
+        """Get algorithm name from key info.
+
+        The key algorithm is detected by the registered `CryptoKeyHandler`,
+        which parses the key data to figure out the algorithm name
+        (e.g. "AES", "ECC", "RSA", ...).
+        """
         helper = crypto_helper()
         algorithm = helper.get_key_algorithm(key=key)
         return '' if algorithm is None else algorithm
 
     @classmethod
     def match_encrypt_key(cls, encrypt_key: EncryptKey, decrypt_key: DecryptKey) -> bool:
-        """ match encrypt key """
+        """Check whether `encrypt_key` can encrypt data for `decrypt_key` to decrypt.
+
+        Returns true if they are a matched symmetric key pair
+        (i.e. both keys are equal).
+        """
         return CryptoKeyHandler.match_symmetric_keys(encrypt_key=encrypt_key, decrypt_key=decrypt_key)
 
     @classmethod
     def match_sign_key(cls, sign_key: SignKey, verify_key: VerifyKey) -> bool:
-        """ match sign key """
+        """Check whether `sign_key` can sign data for `verify_key` to verify.
+
+        Returns true if they are a matched asymmetric key pair
+        (i.e. the private key matches the public key).
+        """
         return CryptoKeyHandler.match_asymmetric_keys(sign_key=sign_key, verify_key=verify_key)
 
     @classmethod
     def symmetric_keys_equal(cls, a: SymmetricKey, b: SymmetricKey) -> bool:
-        """ symmetric key equals """
+        """Compare two symmetric keys.
+
+        Returns true if `a` and `b` are the same object,
+        or they can encrypt/decrypt data for each other.
+        """
         if a is b:
             # same object
             return True
@@ -81,7 +102,11 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
 
     @classmethod
     def private_keys_equal(cls, a: PrivateKey, b: PrivateKey) -> bool:
-        """ asymmetric key equals """
+        """Compare two private keys.
+
+        Returns true if `a` and `b` are the same object,
+        or their public keys are matched by signature.
+        """
         if a is b:
             # same object
             return True
@@ -98,8 +123,17 @@ def crypto_helper() -> CryptoKeyHandler:
     return ext.handler
 
 
+"""
+    Symmetric Key
+    ~~~~~~~~~~~~~
+"""
+
+
 # noinspection PyAbstractClass
 class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
+    """Base class for symmetric keys (e.g. AES, Plain),
+    which use the same key for both encryption and decryption.
+    """
 
     def __init__(self, key: StrMap):
         super().__init__(key)
@@ -138,8 +172,17 @@ class BaseSymmetricKey(Dictionary, SymmetricKey, ABC):
         return BaseKey.match_encrypt_key(encrypt_key=key, decrypt_key=self)
 
 
+"""
+    Asymmetric Keys
+    ~~~~~~~~~~~~~~~
+"""
+
+
 # noinspection PyAbstractClass
 class BaseAsymmetricKey(Dictionary, AsymmetricKey, ABC):
+    """Base classes for asymmetric key pairs (private key & public key),
+    which are used for signing/verifying and encrypting/decrypting.
+    """
 
     def __init__(self, key: StrMap):
         super().__init__(key)
@@ -152,6 +195,9 @@ class BaseAsymmetricKey(Dictionary, AsymmetricKey, ABC):
 
 # noinspection PyAbstractClass
 class BasePublicKey(Dictionary, PublicKey, ABC):
+    """Base class for public keys (e.g. ECC, RSA),
+    which can encrypt data and verify signatures.
+    """
 
     def __init__(self, key: StrMap):
         super().__init__(key)
@@ -168,6 +214,9 @@ class BasePublicKey(Dictionary, PublicKey, ABC):
 
 # noinspection PyAbstractClass
 class BasePrivateKey(Dictionary, PrivateKey, ABC):
+    """Base class for private keys (e.g. ECC, RSA),
+    which can decrypt data and sign messages.
+    """
 
     def __init__(self, key: StrMap):
         super().__init__(key)

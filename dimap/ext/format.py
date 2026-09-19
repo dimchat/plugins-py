@@ -39,6 +39,17 @@ from ..format import DataURI
 
 
 class GeneralFormatHelper(TransportableDataHelper, TransportableFileHelper):
+    """ Format General Helper
+
+    Default implementation of `TransportableDataHelper` and
+    `TransportableFileHelper`, which manages the factories for:
+
+    - TED (Transportable Encoded Data)
+    - PNF (Portable Network File)
+
+    Creates/parses TED and PNF objects by delegating to the
+    registered factories.
+    """
 
     def __init__(self):
         super().__init__()
@@ -117,6 +128,15 @@ class GeneralFormatHelper(TransportableDataHelper, TransportableFileHelper):
 
     # noinspection PyMethodMayBeStatic
     def _get_transportable_file_content(self, pnf: Any) -> Optional[StrMap]:
+        """ Unwrap a PNF object into its content dictionary.
+
+        The object may be a dictionary, a JSON string, a URL string
+        or a data URI string.
+
+        `pnf` - the raw PNF object to unwrap.
+
+        Returns the content dictionary, or null if invalid.
+        """
         if isinstance(pnf, Mapper):
             return pnf.to_map()
         elif isinstance(pnf, Mapping):

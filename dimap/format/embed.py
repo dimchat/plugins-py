@@ -36,11 +36,14 @@ from .duri import StringPairing
 
 class EmbedData(BaseData):
     """
-        RFC 2397
-        ~~~~~~~~
-        https://www.rfc-editor.org/rfc/rfc2397
+    Data URI for embed image/audio.
 
-            data:[<mime type>][;charset=<charset>][;<encoding>],<encoded data>
+    RFC 2397: https://www.rfc-editor.org/rfc/rfc2397
+
+        data:[<mime type>][;charset=<charset>][;<encoding>],<encoded data>
+
+    The encoded string is a data URI which embeds the binary data
+    with its mime-type, charset and encoding parameters.
     """
 
     def __init__(self, string: Optional[str], binary: Optional[bytes]):
@@ -84,6 +87,12 @@ class EmbedData(BaseData):
     #
 
     def header_value(self, name: str) -> Optional[str]:
+        """ Get a header value by name.
+
+        Returns the URI parameter with the exact `name` first, then
+        falls back to the standard headers: "encoding", "mime-type"
+        and "content-type".
+        """
         extra = self.parameters
         if extra is not None:
             value = extra.get(name)
@@ -101,6 +110,7 @@ class EmbedData(BaseData):
 
     @property
     def parameters(self) -> Optional[StringPairing]:
+        """ Get all URI parameters. """
         extra = self.__parameters
         if extra is not None:
             return extra
@@ -110,6 +120,7 @@ class EmbedData(BaseData):
 
     @property
     def mime_type(self) -> Optional[str]:
+        """ Get the mime type header, default is "text/plain". """
         content_type = self.__mime_type
         if content_type is not None:
             return content_type
@@ -119,6 +130,7 @@ class EmbedData(BaseData):
 
     @property
     def charset(self) -> Optional[str]:
+        """ Get the charset header, default is "us-ascii". """
         extra = self.parameters
         if extra is not None:
             value = extra.get('charset')
@@ -130,6 +142,7 @@ class EmbedData(BaseData):
 
     @property
     def filename(self) -> Optional[str]:
+        """ Get the filename parameter, e.g. "avatar.png". """
         extra = self.parameters
         if extra is not None:
             return extra.get('filename')
@@ -140,6 +153,9 @@ class EmbedData(BaseData):
 
     @property
     def data_uri(self) -> Optional[DataURI]:
+        """ If the encoded string is empty, encode the binary data lazily
+        to build the URI with the mime type and parameters.
+        """
         uri = self.__data_uri
         if uri is not None:
             return uri
@@ -178,6 +194,14 @@ class EmbedData(BaseData):
     @classmethod
     def new(cls, string: Optional[str], binary: Optional[bytes],
             uri: DataURI = None, mime_type: str = None, parameters: StringPairing = None):
+        """ Create an EmbedData with the encoded string and optional headers.
+
+        :param string:     the data URI string (may be empty to encode later).
+        :param binary:     the binary data (may be None to decode later).
+        :param uri:        the parsed data URI, if available.
+        :param mime_type:  the mime type header, default is "text/plain".
+        :param parameters: extra URI parameters (charset, filename, ...).
+        """
         if uri is not None:
             if mime_type is None:
                 mime_type = uri.mime_type
@@ -191,14 +215,25 @@ class EmbedData(BaseData):
 
     @classmethod
     def create_with_uri(cls, uri: DataURI):
+        """ Create an EmbedData from a parsed data URI. """
         return cls.new(string=uri.to_str(), binary=None, uri=uri, mime_type=uri.mime_type, parameters=uri.parameters)
 
     @classmethod
     def create_with_string(cls, string: str):
+        """ Create an EmbedData from the data URI string only.
+
+        The binary data will be decoded lazily when accessed.
+        """
         return cls.new(string=string, binary=None)
 
     @classmethod
     def create_with_bytes(cls, binary: bytes, mime_type: str, filename: str = None):
+        """ Create an EmbedData from the binary bytes with a mime type.
+
+        :param binary:    the binary data.
+        :param mime_type: the mime type header (e.g. "image/jpeg").
+        :param filename:  optional filename parameter.
+        """
         if filename is None or len(filename) == 0:
             return cls.new(string='', binary=binary, mime_type=mime_type)
         # create with 'filename'
@@ -215,8 +250,18 @@ class EmbedData(BaseData):
 
     @classmethod
     def image(cls, jpeg: bytes, filename: str = None):
+        """ Create an image EmbedData (mime type "image/jpeg").
+
+        :param jpeg:    the JPEG image data.
+        :param filename: optional filename parameter.
+        """
         return cls.create_with_bytes(binary=jpeg, mime_type='image/jpeg', filename=filename)
 
     @classmethod
     def audio(cls, mp4: bytes, filename: str = None):
+        """ Create an audio EmbedData (mime type "audio/mp4").
+
+        :param mp4:     the MP4 audio data.
+        :param filename: optional filename parameter.
+        """
         return cls.create_with_bytes(binary=mp4, mime_type='audio/mp4', filename=filename)

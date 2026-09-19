@@ -44,6 +44,12 @@ from dimp import StringCoder, UTF8
 
 @final
 class Base64Coder(DataCoder):
+    """
+    Base-64 data coder.
+
+    Encodes bytes to a Base-64 string, and decodes a Base-64 string
+    back to bytes.
+    """
 
     # Override
     def encode(self, data: bytes) -> str:
@@ -58,6 +64,12 @@ class Base64Coder(DataCoder):
 
 @final
 class Base58Coder(DataCoder):
+    """
+    Base-58 data coder.
+
+    Encodes bytes to a Base-58 string, and decodes a Base-58 string
+    back to bytes.
+    """
 
     # Override
     def encode(self, data: bytes) -> str:
@@ -72,6 +84,13 @@ class Base58Coder(DataCoder):
 
 @final
 class HexCoder(DataCoder):
+    """
+    Hexadecimal data coder.
+
+    Encodes bytes to a hex string (lowercase), and decodes a hex string
+    back to bytes. An odd-length hex string is treated as a leading
+    nibble (e.g. "abc" -> [0x0a, 0xbc]).
+    """
 
     # Override
     def encode(self, data: bytes) -> str:
@@ -108,6 +127,12 @@ class HexCoder(DataCoder):
 
 @final
 class JSONCoder(ObjectCoder):
+    """
+    JSON object coder.
+
+    Serializes an object to a JSON string, and parses a JSON string
+    back to a dynamic object.
+    """
 
     # Override
     def encode(self, container: Any) -> str:
@@ -122,6 +147,12 @@ class JSONCoder(ObjectCoder):
 
 @final
 class UTF8Coder(StringCoder):
+    """
+    UTF-8 string coder.
+
+    Encodes a string into UTF-8 bytes, and decodes bytes back
+    to a string (returns None if the bytes are not valid UTF-8).
+    """
 
     # Override
     def encode(self, string: str) -> bytes:
@@ -139,29 +170,39 @@ class UTF8Coder(StringCoder):
 
 # noinspection PyMethodMayBeStatic
 class CoderMixIn:
-    """ Coder Plugins """
+    """
+    Coder Plugins
+
+    Registers the data coders (UTF-8, JSON, Hex, Base-58,
+    Base-64) into the global coder holders.
+    """
 
     # protected
     def register_utf8_coder(self):
+        """ Set UTF-8 coder. """
         # UTF8
         UTF8.coder = UTF8Coder()
 
     # protected
     def register_json_coder(self):
+        """ Set JSON coder. """
         # JSON
         JSON.coder = JSONCoder()
 
     # protected
     def register_hex_coder(self):
+        """ Set HEX coder. """
         # HEX coding
         Hex.coder = HexCoder()
 
     # protected
     def register_base58_coder(self):
+        """ Set Base-58 coder. """
         # Base58 coding
         Base58.coder = Base58Coder()
 
     # protected
     def register_base64_coder(self):
+        """ Set Base-64 coder. """
         # Base64 coding
         Base64.coder = Base64Coder()

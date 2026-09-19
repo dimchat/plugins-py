@@ -66,7 +66,14 @@ class AESKey(BaseSymmetricKey):
 
     @classmethod
     def new_key(cls, size: int = 32) -> SymmetricKey:
-        """ generate a new random key """
+        """Generate a random AES key with the given size (bytes).
+
+        The key data is stored as a base64 encoded string in the 'data' field.
+
+        `size` - key size in bytes, default is 32 (256 bits).
+
+        Returns a new `AESKey` instance.
+        """
         pwd = random_bytes(size=size)
         ted = TransportableData.create(data=pwd)
         key = AESKey(key={
@@ -79,18 +86,29 @@ class AESKey(BaseSymmetricKey):
         return key
 
     def _get_key_size(self) -> int:
-        """ Get key size (bytes), default is 32 bytes (256 bits) """
+        """Get key size (bytes).
+
+        The size is read from the 'keySize' field of the key info,
+        default is 32 bytes (256 bits).
+        """
         # TODO: get from key data
         return self.get_int(key='keySize') or 32
 
     # noinspection PyMethodMayBeStatic
     def _get_default_block_size(self) -> int:
-        """ Get the default block size of AES (16 bytes) """
+        """Get the default block size of AES (16 bytes).
+
+        The block size is used to generate the IV data.
+        """
         # TODO: get from cipher instance
         return AES.block_size  # 16
 
     def _get_block_size(self) -> int:
-        """ Get block size for IV, default is the default block size (16) """
+        """Get block size for IV.
+
+        The size is read from the 'blockSize' field of the key info,
+        default is the `_get_default_block_size` (16 bytes).
+        """
         # TODO: get from iv data
         return self.get_int(key='blockSize') or self._get_default_block_size()
 
@@ -106,14 +124,26 @@ class AESKey(BaseSymmetricKey):
         return ted
 
     def _get_cipher_key(self) -> bytes:
-        """ Get the AES cipher key (raw key data) """
+        """Get the AES cipher key.
+
+        Returns the raw key data as bytes.
+        """
         ted = self.data
         buffer = ted.to_bytes()
         assert buffer is not None, f'key data error: {self}'
         return buffer
 
     def _get_init_vector(self, params: Optional[StrMap]) -> Optional[bytes]:
-        """ get IV from params """
+        """Get the IV data from params.
+
+        The IV is read from the 'IV'/'iv' field of `params`,
+        or from the 'iv'/'IV' field of the key info (for compatibility).
+
+        `params` - extra parameters containing the encoded IV,
+                   should not be null for AES.
+
+        Returns null if no IV data found.
+        """
         # get base64 encoded IV from params
         if params is None:
             assert False, 'params must provided to fetch IV for AES'
@@ -135,11 +165,19 @@ class AESKey(BaseSymmetricKey):
         assert base64 is None, f'IV data error: {base64}'
 
     def _zero_init_vector(self) -> bytes:
+        """Get an empty (zero) IV with the block size."""
         # zero IV
         block_size = self._get_block_size()
         return bytes(block_size)
 
     def _new_init_vector(self, extra: Optional[MutableStrMap]) -> bytes:
+        """Generate a random IV and store it into `extra` as 'IV'.
+
+        `extra` - mutable extra params to store the encoded IV data,
+                  should not be null for AES encryption.
+
+        Returns the random IV data.
+        """
         # random IV data
         block_size = self._get_block_size()
         iv = random_bytes(size=block_size)
@@ -206,6 +244,11 @@ def pkcs7_unpad(data: bytes) -> bytes:
 
 @final
 class AESKeyFactory(SymmetricKeyFactory):
+    """AES Key Factory
+
+    Generates a random `AESKey` or parses a dictionary
+    into an `AESKey` instance.
+    """
 
     # Override
     def generate_symmetric_key(self) -> Optional[SymmetricKey]:

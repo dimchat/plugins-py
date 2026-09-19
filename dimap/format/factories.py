@@ -54,6 +54,13 @@ from .pnf_wrapper import PortableNetworkFileWrapper
 
 
 class BaseNetworkDataFactory(TransportableDataFactory):
+    """
+    Transportable Data Factory (TED)
+
+    Creates a `TransportableData` from raw bytes with optional
+    encoding/mime-type parameters, or parses a data URI / Base-64
+    string back into a `TransportableData` instance.
+    """
 
     # Override
     def create_transportable_data(self, data: bytes, encoding: Optional[str],
@@ -83,6 +90,12 @@ class BaseNetworkDataFactory(TransportableDataFactory):
 
 
 class BaseNetworkFileFactory(TransportableFileFactory):
+    """
+    Portable Network File Factory (PNF)
+
+    Creates a `PortableNetworkFile` from data/filename/URL/password,
+    or parses a PNF dictionary into a `PortableNetworkFile` instance.
+    """
 
     # Override
     def create_transportable_file(self, data: Optional[TransportableData], filename: Optional[str], url: Optional[URI],
@@ -100,6 +113,11 @@ class BaseNetworkFileFactory(TransportableFileFactory):
 
 
 class _PNFWrapperFactory(TransportableFileWrapperFactory):
+    """
+    Default implementation of `TransportableFileWrapperFactory`.
+
+    Creates `PortableNetworkFileWrapper` instances with the given parameters.
+    """
 
     # Override
     def create_transportable_file_wrapper(self, content: StrMap,

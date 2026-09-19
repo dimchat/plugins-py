@@ -35,10 +35,18 @@ from .ext import GeneralFormatHelper
 
 # noinspection PyMethodMayBeStatic
 class CoreMixIn:
-    """ Core Extensions """
+    """ Core Plugins
+
+    Registers the general helpers (crypto & format) into the
+    shared extension holders.
+    """
 
     # protected
     def register_format_helpers(self):
+        """ Register the format helpers.
+
+        Sets a `GeneralFormatHelper` as the default TED/PNF helper.
+        """
         # format
         helper = GeneralFormatHelper()
         shared_format_extensions.ted_helper = helper
@@ -46,6 +54,11 @@ class CoreMixIn:
 
     # protected
     def register_crypto_helpers(self):
+        """ Register the crypto helpers.
+
+        Sets a `GeneralCryptoHelper` as the default key handler
+        and symmetric/private/public key helpers.
+        """
         # crypto
         helper = GeneralCryptoHelper()
         ext = crypto_extensions()

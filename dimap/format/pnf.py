@@ -40,11 +40,25 @@ from .duri import DataURI
 
 
 class PortableNetworkFile(Dictionary, TransportableFile):
+    """
+    PNF - Portable Network File
+
+    A file which can be transmitted over the network, containing
+    any one (or more) of:
+    - file data (embedded as data URI)
+    - file name
+    - download URL (CDN)
+    - password (decrypt key for the data downloaded from CDN)
+
+    It is serialized as a string (URI) when possible, or as a
+    dictionary otherwise.
+    """
 
     def __init__(self, dictionary: Optional[StrMap],
                  data: Optional[TransportableData] = None, filename: Optional[str] = None,
                  url: Optional[URI] = None, password: Optional[DecryptKey] = None,
                  wrapper: Optional[TransportableFileWrapper] = None):
+        """ Create a PNF with the content dictionary and optional properties. """
         super().__init__(dictionary=dictionary)
         if wrapper is None:
             wrapper = TransportableFileWrapper.create(super().to_map(),
@@ -55,6 +69,11 @@ class PortableNetworkFile(Dictionary, TransportableFile):
     # protected
     @property
     def uri_string(self) -> Optional[str]:
+        """ Serialize this PNF into a URI string.
+
+        Returns the data URI / URL string if this PNF can be represented
+        by a single URI, otherwise returns None.
+        """
         # serialize
         wrapper = self.__wrapper
         info = wrapper.to_map()

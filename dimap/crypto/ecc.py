@@ -70,7 +70,10 @@ class ECCPublicKey(BasePublicKey):
 
     @property  # protected
     def ecc_key(self) -> ecdsa.VerifyingKey:
-        """ Get the native ECC public key object (decoded from 'data') """
+        """Get the native ECC public key object.
+
+        The key data (PEM or hex encoded) is decoded from the 'data' field.
+        """
         verify_key = self.__key
         if verify_key is None:
             # data in 'PEM' format
@@ -90,7 +93,11 @@ class ECCPublicKey(BasePublicKey):
 
     @property
     def compressed(self) -> bool:
-        """ whether the public key data is encoded in compressed format """
+        """Whether the public key data is encoded in compressed format.
+
+        The value is read from the 'compressed' field of the key info,
+        default is false (uncompressed).
+        """
         return self.get_bool(key='compressed') or False
 
     @property  # Override
@@ -111,6 +118,10 @@ class ECCPublicKey(BasePublicKey):
 
     # Override
     def verify(self, data: bytes, signature: bytes) -> bool:
+        """Verify `signature` of `data` with the public key.
+
+        Returns true if the signature is valid.
+        """
         try:
             verifier = self.ecc_key
             return verifier.verify(signature=signature, data=data, hashfunc=self.hash_func, sigdecode=self.sig_decode)
@@ -137,7 +148,16 @@ class ECCPrivateKey(BasePrivateKey):
 
     @classmethod
     def new_key(cls, curve_name: str = 'secp256k1') -> PrivateKey:
-        """ generate new private key """
+        """Generate a random ECC key pair.
+
+        The private key is stored in the key info as PEM data,
+        with 'curve' and 'digest' fields for the parameters.
+
+        `curve_name` - name of the elliptic curve,
+                       default is "secp256k1".
+
+        Returns a new `ECCPrivateKey` instance.
+        """
         curve = ecdsa.SECP256k1
         hash_func = hashlib.sha256
         ecc_key = ecdsa.SigningKey.generate(curve=curve, hashfunc=hash_func)
@@ -167,12 +187,19 @@ class ECCPrivateKey(BasePrivateKey):
 
     @property  # private
     def curve_name(self) -> str:
-        """ get the curve name of this key, default is 'secp256k1' """
+        """Get the curve name of this key.
+
+        The value is read from the 'curve' field of the key info,
+        default is "secp256k1".
+        """
         return self.get_str(key='curve') or 'secp256k1'
 
     @property  # protected
     def ecc_key(self) -> ecdsa.SigningKey:
-        """ Get the native ECC private key object (decoded from 'data') """
+        """Get the native ECC private key object.
+
+        The key data (PEM or hex encoded) is decoded from the 'data' field.
+        """
         sign_key = self.__key
         if sign_key is None:
             data = self.get_str(key='data') or ''
@@ -199,6 +226,11 @@ class ECCPrivateKey(BasePrivateKey):
 
     @property  # Override
     def public_key(self) -> Union[PublicKey]:
+        """Calculate ECC public key from the private key.
+
+        The public key is derived from the native ECC private key object
+        and encoded to PEM format (X.509).
+        """
         pub = self.__public_key
         if pub is None:
             sign_key = self.ecc_key
@@ -219,6 +251,10 @@ class ECCPrivateKey(BasePrivateKey):
 
     # Override
     def sign(self, data: bytes) -> bytes:
+        """Sign `data` with the private key.
+
+        Returns the ECDSA signature (r, s encoded as ASN.1).
+        """
         signer = self.ecc_key
         return signer.sign(data=data, hashfunc=self.hash_func, sigencode=self.sig_encode)
 
@@ -231,6 +267,10 @@ class ECCPrivateKey(BasePrivateKey):
 
 @final
 class ECCPublicKeyFactory(PublicKeyFactory):
+    """ECC Public Key Factory
+
+    Parses a dictionary into an `ECCPublicKey` instance.
+    """
 
     # Override
     def parse_public_key(self, key: StrMap) -> Optional[PublicKey]:
@@ -245,6 +285,11 @@ class ECCPublicKeyFactory(PublicKeyFactory):
 
 @final
 class ECCPrivateKeyFactory(PrivateKeyFactory):
+    """ECC Private Key Factory
+
+    Generates a new `ECCPrivateKey` or parses a dictionary
+    into an `ECCPrivateKey` instance.
+    """
 
     # Override
     def generate_private_key(self) -> Optional[PrivateKey]:
