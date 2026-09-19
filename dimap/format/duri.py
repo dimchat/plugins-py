@@ -25,7 +25,7 @@
 
 from typing import Optional
 
-from mkm.format import Base64, UTF8
+from dimp import Base64, UTF8
 
 
 """

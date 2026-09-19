@@ -46,7 +46,14 @@ def random_bytes(size: int) -> bytes:
 
 
 class AESKey(BaseSymmetricKey):
-    """ AES Key """
+    """ AES Key
+
+        keyInfo format: {
+            algorithm: "AES",
+            keySize  : 32,                // optional
+            data     : "{BASE64_ENCODE}}" // key data
+        }
+    """
 
     AES_CBC_PKCS7 = "AES/CBC/PKCS7Padding"
 
@@ -63,7 +70,7 @@ class AESKey(BaseSymmetricKey):
     def new_key(cls, size: int = 32) -> SymmetricKey:
         """ generate a new random key """
         pwd = random_bytes(size=size)
-        ted = Base64Data.create(binary=pwd)
+        ted = Base64Data.create_with_bytes(binary=pwd)
         key = AESKey(key={
             'algorithm': SymmetricAlgorithms.AES,
             'data': ted.serialize(),
@@ -73,31 +80,21 @@ class AESKey(BaseSymmetricKey):
         key.__data = ted
         return key
 
-    @property
-    def size(self) -> int:
+    def _get_key_size(self) -> int:
+        """ Get key size (bytes), default is 32 bytes (256 bits) """
         # TODO: get from key data
-        count = self.get_int(key='keySize')
-        if count is None:
-            return self.bits >> 3  # 32
-        else:
-            return count
+        return self.get_int(key='keySize') or 32
 
-    @property
-    def bits(self) -> int:
-        count = self.get_int(key='sizeInBits')
-        if count is None:
-            return 256  # AES-256
-        else:
-            return count
+    # noinspection PyMethodMayBeStatic
+    def _get_default_block_size(self) -> int:
+        """ Get the default block size of AES (16 bytes) """
+        # TODO: get from cipher instance
+        return AES.block_size  # 16
 
-    @property
-    def block_size(self) -> int:
+    def _get_block_size(self) -> int:
+        """ Get block size for IV, default is the default block size (16) """
         # TODO: get from iv data
-        count = self.get_int(key='blockSize')
-        if count is None:
-            return AES.block_size  # 16
-        else:
-            return count
+        return self.get_int(key='blockSize') or self._get_default_block_size()
 
     @property  # Override
     def data(self) -> TransportableData:
@@ -109,6 +106,13 @@ class AESKey(BaseSymmetricKey):
             assert ted is not None, f'key data error: {base64}'
             self.__data = ted
         return ted
+
+    def _get_cipher_key(self) -> bytes:
+        """ Get the AES cipher key (raw key data) """
+        ted = self.data
+        buffer = ted.to_bytes()
+        assert buffer is not None, f'key data error: {self}'
+        return buffer
 
     def _get_init_vector(self, params: Optional[StrMap]) -> Optional[bytes]:
         """ get IV from params """
@@ -133,18 +137,19 @@ class AESKey(BaseSymmetricKey):
         assert base64 is None, f'IV data error: {base64}'
 
     def _zero_init_vector(self) -> bytes:
-        # zero IV:
-        #           b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0'
-        return self.block_size * chr(0).encode('utf-8')
+        # zero IV
+        block_size = self._get_block_size()
+        return bytes(block_size)
 
     def _new_init_vector(self, extra: Optional[MutableStrMap]) -> bytes:
         # random IV data
-        iv = random_bytes(size=self.block_size)
+        block_size = self._get_block_size()
+        iv = random_bytes(size=block_size)
         # put encoded IV into extra
         if extra is None:
             assert False, 'extra dict must provided to store IV for AES'
         else:
-            ted = Base64Data.create(binary=iv)
+            ted = Base64Data.create_with_bytes(binary=iv)
             extra['IV'] = ted.serialize()
         # OK
         return iv
@@ -155,11 +160,10 @@ class AESKey(BaseSymmetricKey):
         key_iv = self._get_init_vector(params=extra)
         if key_iv is None:
             key_iv = self._new_init_vector(extra=extra)
-        # 2. get key data
-        key_data = self.data
-        buffer = key_data.to_bytes()
+        # 2. get cipher key
+        buffer = self._get_cipher_key()
         # 3. try to encrypt
-        data = pkcs7_pad(data=plaintext, block_size=AES.block_size)
+        data = pkcs7_pad(data=plaintext, block_size=self._get_default_block_size())
         key = AES.new(buffer, AES.MODE_CBC, key_iv)
         return key.encrypt(data)
 
@@ -169,9 +173,8 @@ class AESKey(BaseSymmetricKey):
         key_iv = self._get_init_vector(params=params)
         if key_iv is None:
             key_iv = self._zero_init_vector()
-        # 2. get key data
-        key_data = self.data
-        buffer = key_data.to_bytes()
+        # 2. get cipher key
+        buffer = self._get_cipher_key()
         # 3. try to decrypt
         try:
             key = AES.new(buffer, AES.MODE_CBC, key_iv)
@@ -212,9 +215,10 @@ class AESKeyFactory(SymmetricKeyFactory):
 
     # Override
     def parse_symmetric_key(self, key: StrMap) -> Optional[SymmetricKey]:
-        # check 'data'
-        if 'data' not in key:
+        # check 'data', 'algorithm'
+        if key.get('data') is None or key.get('algorithm') is None:
             # key.data should not be empty
+            # key.algorithm should not be empty
             return None
         # OK
         return AESKey(key=key)

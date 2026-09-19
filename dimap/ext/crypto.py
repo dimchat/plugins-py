@@ -52,8 +52,8 @@ except TypeError:
     PublicKeyFactoryMap = typing.MutableMapping[str, PublicKeyFactory]
 
 
-class CryptographyKeyGeneralFactory(CryptoKeyHandler, SymmetricKeyHelper,
-                                    PrivateKeyHelper, PublicKeyHelper):
+class GeneralCryptoHelper(CryptoKeyHandler, SymmetricKeyHelper,
+                          PrivateKeyHelper, PublicKeyHelper):
 
     def __init__(self):
         super().__init__()

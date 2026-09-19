@@ -27,8 +27,10 @@ from typing import Union
 
 from dimp import SymmetricKeyExtension, PublicKeyExtension, PrivateKeyExtension
 from dimp import GeneralCryptoExtension, shared_crypto_extensions
+from dimp import shared_format_extensions
 
-from .ext.crypto import CryptographyKeyGeneralFactory
+from .ext.crypto import GeneralCryptoHelper
+from .ext.format import GeneralFormatHelper
 
 
 # noinspection PyMethodMayBeStatic
@@ -36,14 +38,21 @@ class CoreMixIn:
     """ Core Extensions """
 
     # protected
+    def register_format_helpers(self):
+        # format
+        helper = GeneralFormatHelper()
+        shared_format_extensions.ted_helper = helper
+        shared_format_extensions.pnf_helper = helper
+
+    # protected
     def register_crypto_helpers(self):
         # crypto
-        helper = CryptographyKeyGeneralFactory()
+        helper = GeneralCryptoHelper()
         ext = crypto_extensions()
         ext.symmetric_helper = helper
         ext.private_helper = helper
         ext.public_helper = helper
-        ext.helper = helper
+        ext.handler = helper
 
 
 def crypto_extensions() -> Union[SymmetricKeyExtension, PublicKeyExtension, PrivateKeyExtension,

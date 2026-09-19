@@ -51,9 +51,18 @@ class PlainKey(BaseSymmetricKey):
             'algorithm': SymmetricAlgorithms.PLAIN,
         })
 
-    @property
-    def size(self) -> int:
-        return 0
+    __instance = None
+
+    @classmethod
+    def get_instance(cls) -> SymmetricKey:
+        """ Get the singleton PlainKey instance.
+
+            PlainKey is a stateless key which does nothing when
+            encrypting/decrypting, so there is only one global instance.
+        """
+        if cls.__instance is None:
+            cls.__instance = cls.new_key()
+        return cls.__instance
 
     @property  # Override
     def data(self) -> TransportableData:
@@ -83,7 +92,7 @@ class PlainKeyFactory(SymmetricKeyFactory):
 
     # Override
     def generate_symmetric_key(self) -> Optional[SymmetricKey]:
-        return PlainKey.new_key()
+        return PlainKey.get_instance()
 
     # Override
     def parse_symmetric_key(self, key: StrMap) -> Optional[SymmetricKey]:

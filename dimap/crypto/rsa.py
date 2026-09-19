@@ -43,7 +43,13 @@ from .keys import BaseKey, BasePublicKey, BasePrivateKey
 
 
 class RSAPublicKey(BasePublicKey, EncryptKey):
-    """ RSA Public Key """
+    """ RSA Public Key
+
+        keyInfo format: {
+            algorithm  : "RSA",
+            data       : "..." // base64_encode()
+        }
+    """
 
     def __init__(self, key: StrMap):
         super().__init__(key)
@@ -51,13 +57,18 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
         self.__key: Optional[RSA.RsaKey] = None
         self.__data: Optional[TransportableData] = None
 
-    @property  # private
+    def key_size(self) -> int:
+        """ Get the RSA key size (bytes), default is 128 bytes (1024 bits) """
+        # TODO: get from key
+        return self.get_int(key='keySize') or 128  # 1024 / 8
+
+    @property  # protected
     def rsa_key(self) -> RSA.RsaKey:
+        """ Get the native RSA public key object (decoded from 'data') """
         verify_key = self.__key
         if verify_key is None:
             # data in 'PEM' format
-            data = self.get('data')
-            assert data is not None, f'failed to get key data: {self}'
+            data = self.get_str(key='data') or ''
             verify_key = RSA.importKey(data)
             self.__key = verify_key
         return verify_key
@@ -69,24 +80,14 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
             rsa_key = self.rsa_key
             assert rsa_key is not None, f'rsa key error: {self}'
             binary = rsa_key.exportKey(format='DER')
-            ted = PlainData.create(binary=binary)
+            ted = PlainData.create_with_bytes(binary=binary)
             self.__data = ted
         return ted
 
-    @property
-    def size(self) -> int:
-        return self.bits >> 3
-
-    @property
-    def bits(self) -> int:
-        bits = self.get('sizeInBits')
-        if bits is None:
-            return 1024  # RSA-1024
-        else:
-            return int(bits)
-
     # Override
     def encrypt(self, plaintext: bytes, extra: Optional[MutableStrMap] = None) -> bytes:
+        if len(plaintext) > self.key_size() - 11:
+            raise ValueError(f'RSA plain text length error: {len(plaintext)}')
         cipher = Cipher_PKCS1_v1_5.new(self.rsa_key)
         return cipher.encrypt(plaintext)
 
@@ -103,13 +104,20 @@ class RSAPublicKey(BasePublicKey, EncryptKey):
 
 
 class RSAPrivateKey(BasePrivateKey, DecryptKey):
-    """ RSA Private Key """
+    """ RSA Private Key
+
+        keyInfo format : {
+            algorithm  : "RSA",
+            data       : "..." // base64_encode()
+        }
+    """
 
     def __init__(self, key: StrMap):
         super().__init__(key)
         # lazy load
         self.__key: Optional[RSA.RsaKey] = None
         self.__data: Optional[TransportableData] = None
+        self.__public_key: Optional[PublicKey] = None
 
     @classmethod
     def new_key(cls, bits: int = 1024) -> PrivateKey:
@@ -128,12 +136,17 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
         # key.__data = PlainData.create(binary=rsa_key.exportKey(format='DER'))
         return key
 
-    @property  # private
+    def key_size(self) -> int:
+        """ Get the RSA key size (bytes), default is 128 bytes (1024 bits) """
+        # TODO: get from key
+        return self.get_int(key='keySize') or 128  # 1024 / 8
+
+    @property  # protected
     def rsa_key(self) -> RSA.RsaKey:
+        """ Get the native RSA private key object (decoded from 'data') """
         if self.__key is None:
             # data in 'PEM' format
-            data = self.get('data')
-            assert data is not None, f'failed to get key data: {self}'
+            data = self.get_str(key='data') or ''
             tag1 = '-----BEGIN RSA PRIVATE KEY-----'
             tag2 = '-----END RSA PRIVATE KEY-----'
             pos2 = data.rfind(tag2)
@@ -150,39 +163,34 @@ class RSAPrivateKey(BasePrivateKey, DecryptKey):
             rsa_key = self.rsa_key
             assert rsa_key is not None, f'rsa key error: {self}'
             binary = rsa_key.exportKey(format='DER')
-            ted = PlainData.create(binary=binary)
+            ted = PlainData.create_with_bytes(binary=binary)
             self.__data = ted
         return ted
 
-    @property
-    def size(self) -> int:
-        return self.bits >> 3
-
-    @property
-    def bits(self) -> int:
-        bits = self.get('sizeInBits')
-        if bits is None:
-            return 1024  # RSA-1024
-        else:
-            return int(bits)
-
     @property  # Override
     def public_key(self) -> Union[PublicKey, EncryptKey]:
-        pub = self.rsa_key.publickey()
-        pem = pub.exportKey(format='PEM', pkcs=1).decode('utf-8')
-        key = RSAPublicKey(key={
-            'algorithm': AsymmetricAlgorithms.RSA,
-            'data': pem,
-            'mode': 'ECB',
-            'padding': 'PKCS1',
-            'digest': 'SHA256'
-        })
-        key.__key = pub
-        # key.__data = PlainData.create(binary=pub.exportKey(format='DER'))
-        return key
+        pub = self.__public_key
+        if pub is None:
+            rsa_key = self.rsa_key
+            pub_key = rsa_key.publickey()
+            pem = pub_key.exportKey(format='PEM', pkcs=1).decode('utf-8')
+            info = {
+                'algorithm': AsymmetricAlgorithms.RSA,
+                'data': pem,
+                'mode': 'ECB',
+                'padding': 'PKCS1',
+                'digest': 'SHA256',
+            }
+            pub = RSAPublicKey(key=info)
+            pub.__key = pub_key
+            # pub.__data = PlainData.create_with_bytes(binary=pub_key.exportKey(format='DER'))
+            self.__public_key = pub
+        return pub
 
     # Override
     def decrypt(self, ciphertext: bytes, params: Optional[StrMap] = None) -> Optional[bytes]:
+        if len(ciphertext) != self.key_size():
+            raise ValueError(f'RSA cipher text length error: {len(ciphertext)}')
         sentinel: Optional[bytes] = None
         try:
             cipher = Cipher_PKCS1_v1_5.new(self.rsa_key)
@@ -212,9 +220,10 @@ class RSAPublicKeyFactory(PublicKeyFactory):
 
     # Override
     def parse_public_key(self, key: StrMap) -> Optional[PublicKey]:
-        # check 'data'
-        if 'data' not in key:
+        # check 'data', 'algorithm'
+        if key.get('data') is None or key.get('algorithm') is None:
             # key.data should not be empty
+            # key.algorithm should not be empty
             return None
         # OK
         return RSAPublicKey(key)
@@ -229,9 +238,10 @@ class RSAPrivateKeyFactory(PrivateKeyFactory):
 
     # Override
     def parse_private_key(self, key: StrMap) -> Optional[PrivateKey]:
-        # check 'data'
-        if 'data' not in key:
+        # check 'data', 'algorithm'
+        if key.get('data') is None or key.get('algorithm') is None:
             # key.data should not be empty
+            # key.algorithm should not be empty
             return None
         # OK
         return RSAPrivateKey(key)

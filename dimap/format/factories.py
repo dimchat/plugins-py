@@ -30,6 +30,8 @@
     TED, PNF
 """
 
+import base64
+
 from typing import Optional
 
 from dimp import StrMap
@@ -37,6 +39,8 @@ from dimp import DecryptKey
 from dimp import URI
 from dimp import TransportableData, TransportableDataFactory
 from dimp import TransportableFile, TransportableFileFactory
+
+from ..crypto import EncodeAlgorithms
 
 from .duri import DataURI
 from .embed import EmbedData
@@ -48,15 +52,30 @@ from .pnf import PortableNetworkFile
 class BaseNetworkDataFactory(TransportableDataFactory):
 
     # Override
+    def create_transportable_data(self, data: bytes, encoding: Optional[str],
+                                  mime_type: Optional[str],
+                                  parameters: Optional[StrMap]) -> TransportableData:
+        if encoding is None:
+            # default with Base-64 encoding
+            return Base64Data.create_with_bytes(binary=data)
+        elif mime_type is None:
+            mime_type = 'text/plain'
+        assert EncodeAlgorithms.BASE_64 == encoding, f'TED encoding error: {encoding}'
+        encoded = base64.b64encode(data).decode('utf-8')
+        uri = f'data:{mime_type};{encoding},{encoded}'
+        return EmbedData.create_with_uri(uri=DataURI.parse(uri=uri))
+
+    # Override
     def parse_transportable_data(self, ted: str) -> Optional[TransportableData]:
         # check data URI
         uri = DataURI.parse(uri=ted)
         if uri is not None:
             # "data:image/jpeg;base64,..."
+            assert uri.is_base64, f'TED encoding error: {uri.parameters}'
             return EmbedData.create_with_uri(uri=uri)
         # TODO: check Base-64 format
         # "{BASE64_ENCODED}"
-        return Base64Data.create(string=ted)
+        return Base64Data.create_with_string(encoded=ted)
 
 
 class BaseNetworkFileFactory(TransportableFileFactory):
@@ -69,9 +88,11 @@ class BaseNetworkFileFactory(TransportableFileFactory):
     # Override
     def parse_transportable_file(self, pnf: StrMap) -> Optional[TransportableFile]:
         # check 'data', 'URL', 'filename'
-        if 'data' in pnf or 'URL' in pnf or 'filename' in pnf:
+        if pnf.get('data') is None and pnf.get('URL') is None and pnf.get('filename') is None:
+            # pnf.data and pnf.URL and pnf.filename should not be empty at the same time
+            assert False, f'PNF error: {pnf}'
+        else:
             return PortableNetworkFile(dictionary=pnf)
-        # pnf.data and pnf.URL and pnf.filename should not be empty at the same time
 
 
 # noinspection PyMethodMayBeStatic
@@ -89,3 +110,10 @@ class TransportableMixIn:
         # PNF
         factory = BaseNetworkFileFactory()
         PortableNetworkFile.set_factory(factory=factory)
+
+    # protected
+    def register_pnf_wrapper_factory(self):
+        # PNF Wrapper
+        from .pnf_wrapper import _PNFWrapperFactory
+        from dimp import shared_format_extensions
+        shared_format_extensions.pnf_wrapper_factory = _PNFWrapperFactory()

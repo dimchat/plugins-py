@@ -50,17 +50,6 @@ class CryptoMixIn:
         SymmetricKey.set_factory(algorithm=SymmetricAlgorithms.PLAIN, factory=factory)
 
     # protected
-    def register_ecc_key_factories(self):
-        # Public Key: ECC
-        ecc_pub = ECCPublicKeyFactory()
-        PublicKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pub)
-        PublicKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pub)
-        # Private Key: ECC
-        ecc_pri = ECCPrivateKeyFactory()
-        PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pri)
-        PrivateKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pri)
-
-    # protected
     def register_rsa_key_factories(self):
         # Public Key: RSA
         rsa_pub = RSAPublicKeyFactory()
@@ -72,3 +61,14 @@ class CryptoMixIn:
         PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.RSA, factory=rsa_pri)
         PrivateKey.set_factory(algorithm='SHA256withRSA', factory=rsa_pri)
         PrivateKey.set_factory(algorithm='RSA/ECB/PKCS1Padding', factory=rsa_pri)
+
+    # protected
+    def register_ecc_key_factories(self):
+        # Public Key: ECC
+        ecc_pub = ECCPublicKeyFactory()
+        PublicKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pub)
+        PublicKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pub)
+        # Private Key: ECC
+        ecc_pri = ECCPrivateKeyFactory()
+        PrivateKey.set_factory(algorithm=AsymmetricAlgorithms.ECC, factory=ecc_pri)
+        PrivateKey.set_factory(algorithm='SHA256withECDSA', factory=ecc_pri)

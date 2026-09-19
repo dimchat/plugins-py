@@ -25,11 +25,10 @@
 
 from typing import Optional
 
-from mkm.format import Base64
-
+from dimp import Base64
 from dimp import BaseData
 
-from ..crypto.algorithms import EncodeAlgorithms
+from ..crypto import EncodeAlgorithms
 
 
 class Base64Data(BaseData):
@@ -47,6 +46,7 @@ class Base64Data(BaseData):
             assert base64 is not None, f'Base64Data error: {self}'
             data = Base64.decode(string=base64)
             self._binary = data
+            assert data is not None, f'failed to decode base64 string: {base64}'
         return data
 
     # Override
@@ -54,17 +54,35 @@ class Base64Data(BaseData):
         base64 = self._string
         if base64 is None or len(base64) == 0:
             data = self._binary
-            assert data is not None, f'Base64Data error: {self}'
+            assert data is not None, f'failed to encode base64 data: {self}'
             base64 = Base64.encode(data=data)
             self._string = base64
+            assert len(base64) > 0, f'failed to encode base64 data: {len(data)} byte(s)'
         return base64
 
     #
     #   Factory
     #
 
+    # @classmethod
+    # def new(cls, string: str = None, binary: bytes = None):
+    #     """ Create a Base-64 data with both the encoded string and the bytes. """
+    #     assert not (string is None and binary is None), \
+    #         'encoded string and binary data should not be empty at the same time'
+    #     return Base64Data(string=string, binary=binary)
+
     @classmethod
-    def create(cls, string: str = None, binary: bytes = None):
-        assert not (string is None and binary is None), \
-            'encoded string and binary data should not be empty at the same time'
-        return Base64Data(string=string, binary=binary)
+    def create_with_string(cls, encoded: str):
+        """ Create a Base-64 data from the encoded string only.
+
+        The binary data will be decoded lazily when accessed.
+        """
+        return Base64Data(string=encoded, binary=None)
+
+    @classmethod
+    def create_with_bytes(cls, binary: bytes):
+        """ Create a Base-64 data from the binary bytes only.
+
+        The encoded string will be generated lazily when accessed.
+        """
+        return Base64Data(string='', binary=binary)

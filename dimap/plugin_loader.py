@@ -26,6 +26,7 @@
 from .plugin_core import CoreMixIn
 
 from .format.coder import CoderMixIn
+from .format.factories import TransportableMixIn
 
 from .crypto.digest import DigestMixIn
 
@@ -33,19 +34,29 @@ from .plugin_keys import CryptoMixIn
 
 
 # noinspection PyMethodMayBeStatic
-class PluginLoader(CoreMixIn, CoderMixIn, DigestMixIn, CryptoMixIn):
+class PluginLoader(CoreMixIn, CoderMixIn, DigestMixIn, TransportableMixIn, CryptoMixIn):
 
     def load(self):
         """ Register plugins """
+        self._load_core_plugins()
+
+        self._load_digest_plugins()
+
+        self._load_coder_plugins()
+
+        self._load_format_plugins()
+
+        self._load_crypto_plugins()
+
+    # protected
+    def _load_core_plugins(self):
+        """ Core extensions """
+        self.register_format_helpers()
+
         self.register_crypto_helpers()
 
-        self._load_data_coders()
-
-        self._load_message_digesters()
-
-        self._load_crypto_key_factories()
-
-    def _load_data_coders(self):
+    # protected
+    def _load_coder_plugins(self):
         """ Data coders """
         self.register_base58_coder()
         self.register_base64_coder()
@@ -54,19 +65,29 @@ class PluginLoader(CoreMixIn, CoderMixIn, DigestMixIn, CryptoMixIn):
         self.register_utf8_coder()
         self.register_json_coder()
 
-    def _load_message_digesters(self):
-        """ Data digesters """
+    # protected
+    def _load_digest_plugins(self):
+        """ Message digesters """
         self.register_sha256_digester()
 
         self.register_keccak256_digester()
 
         self.register_ripemd160_digester()
 
-    def _load_crypto_key_factories(self):
+    # protected
+    def _load_format_plugins(self):
+        """ Format plugins """
+        self.register_ted_factory()
+
+        self.register_pnf_factory()
+        self.register_pnf_wrapper_factory()
+
+    # protected
+    def _load_crypto_plugins(self):
         """ Crypto key parsers """
         # Symmetric keys
         self.register_aes_key_factory()
         self.register_plain_key_factory()
         # Asymmetric keys
-        self.register_ecc_key_factories()
         self.register_rsa_key_factories()
+        self.register_ecc_key_factories()

@@ -25,11 +25,11 @@
 
 from typing import Optional
 
-from mkm.format import Base64
-
+from dimp import Base64
 from dimp import BaseData
 
-from ..crypto.algorithms import EncodeAlgorithms
+from ..crypto import EncodeAlgorithms
+
 from .duri import DataURI
 from .duri import StringPairing
 
@@ -92,12 +92,12 @@ class EmbedData(BaseData):
                 # filename
                 return value
         lo = name.lower()
-        if lo == 'mime-type':
+        if lo == 'encoding':
+            return self.encoding
+        elif lo == 'mime-type':
             return self.mime_type
         elif lo == 'content-type':
             return self.mime_type
-        # elif lo == 'encoding':
-        #     return self.encoding
 
     @property
     def parameters(self) -> Optional[StringPairing]:
@@ -153,9 +153,13 @@ class EmbedData(BaseData):
             assert len(data) > 0, 'embed data empty'
             # encode body
             body = Base64.encode(data=data)
+            assert len(body) > 0, f'failed to encode {len(data)} byte(s)'
             # build header
             mime_type = self.__mime_type
-            header = 'text/plain' if mime_type is None else mime_type
+            if mime_type is None:
+                # make sure 'mime-type' is the first header
+                mime_type = 'text/plain'
+            header = mime_type
             extra = self.__parameters
             if extra is not None:
                 for key, value in extra.items():
@@ -174,23 +178,16 @@ class EmbedData(BaseData):
     @classmethod
     def new(cls, string: Optional[str], binary: Optional[bytes],
             uri: DataURI = None, mime_type: str = None, parameters: StringPairing = None):
-        if parameters is None and uri is not None:
-            parameters = uri.parameters
+        if uri is not None:
+            if mime_type is None:
+                mime_type = uri.mime_type
+            if parameters is None:
+                parameters = uri.parameters
         embed = EmbedData(string=string, binary=binary)
         embed.__data_uri = uri
         embed.__mime_type = mime_type
         embed.__parameters = parameters
         return embed
-
-    @classmethod
-    def create(cls, string: Optional[str], binary: Optional[bytes], uri: DataURI = None):
-        if uri is None:
-            mime_type = None
-            parameters = None
-        else:
-            mime_type = uri.mime_type
-            parameters = uri.parameters
-        return cls.new(string=string, binary=binary, uri=uri, mime_type=mime_type, parameters=parameters)
 
     @classmethod
     def create_with_uri(cls, uri: DataURI):

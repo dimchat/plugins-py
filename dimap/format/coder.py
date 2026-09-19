@@ -81,9 +81,29 @@ class HexCoder(DataCoder):
 
     # Override
     def decode(self, string: str) -> Optional[bytes]:
-        """ HEX Decode """
+        """ HEX Decode
+
+        An odd-length hex string is treated as a leading nibble
+        (e.g. "abc" -> [0x0a, 0xbc]); returns None on invalid chars.
+        """
         # return binascii.a2b_hex(string)
-        return bytes.fromhex(string)
+        length = len(string)
+        odd = length & 1 == 1
+        if odd:
+            # treat the first char as a leading nibble
+            try:
+                value0 = int(string[0], 16)
+            except ValueError:
+                return None
+            try:
+                rest = bytes.fromhex(string[1:])
+            except ValueError:
+                return None
+            return bytes([value0]) + rest
+        try:
+            return bytes.fromhex(string)
+        except ValueError:
+            return None
 
 
 @final
@@ -110,8 +130,11 @@ class UTF8Coder(StringCoder):
 
     # Override
     def decode(self, data: bytes) -> Optional[str]:
-        """ UTF-8 decode """
-        return data.decode('utf-8')
+        """ UTF-8 decode (returns None if not valid UTF-8) """
+        try:
+            return data.decode('utf-8')
+        except UnicodeDecodeError:
+            return None
 
 
 # noinspection PyMethodMayBeStatic

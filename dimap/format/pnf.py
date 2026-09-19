@@ -36,6 +36,8 @@ from dimp import JSONMap
 from dimp import TransportableFile
 from dimp import TransportableFileWrapper
 
+from .duri import DataURI
+
 
 class PortableNetworkFile(Dictionary, TransportableFile):
 
@@ -79,12 +81,15 @@ class PortableNetworkFile(Dictionary, TransportableFile):
                 # and it is a data URI,
                 # so return the URI string here.
                 return text
-            elif count == 2:
-                # check filename
+            elif count == 2 and 'filename' in info:
+                # check 'filename'
                 filename = self.get_str(key='filename')
-                if filename is not None and len(filename) > 0:
-                    # TODO: add 'filename' to data URI
+                if filename is None or len(filename) == 0:
+                    # nothing changed
                     return text
+                # add 'filename' to data URI
+                text = self.new_data_uri(text=text, filename=filename)
+                return text
             # this PNF info contains other params,
             # cannot serialize it as a string.
             return None
@@ -92,6 +97,42 @@ class PortableNetworkFile(Dictionary, TransportableFile):
         # so there is just a 'filename' here,
         # cannot build URI string
         return None
+
+    # protected
+    # noinspection PyMethodMayBeStatic
+    def new_data_uri(self, text: str, filename: str) -> str:
+        """ Build a new data URI by updating the 'filename' parameter.
+
+        :param text:     the original data URI string.
+        :param filename: the new filename to set (empty to remove it).
+        :return: the rebuilt data URI.
+        """
+        uri = DataURI.parse(uri=text)
+        assert uri is not None, f'data URI error: {text}'
+        # copy extra values
+        extra = {}
+        if uri.parameters is not None:
+            extra.update(uri.parameters)
+        if len(filename) == 0:
+            # erase 'filename'
+            extra.pop('filename', None)
+        else:
+            # update 'filename'
+            extra['filename'] = filename
+        # build header
+        mime_type = uri.mime_type
+        if len(mime_type) == 0:
+            # make sure 'mime-type' is the first header
+            mime_type = 'text/plain'
+        header = mime_type
+        for name, value in extra.items():
+            header += f';{name}={value}'
+        if uri.is_base64:
+            header += ';base64'
+        # build new data URI
+        pos = text.find(',')
+        body = text[pos + 1:]
+        return f'data:{header},{body}'
 
     # Override
     def __str__(self) -> str:

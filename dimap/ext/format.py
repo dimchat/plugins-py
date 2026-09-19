@@ -38,7 +38,7 @@ from dimp import TransportableFile, TransportableFileFactory
 from dimp import TransportableFileHelper
 
 
-class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
+class GeneralFormatHelper(TransportableDataHelper, TransportableFileHelper):
 
     def __init__(self):
         super().__init__()
@@ -56,6 +56,15 @@ class FormatGeneralFactory(TransportableDataHelper, TransportableFileHelper):
     # Override
     def get_transportable_data_factory(self) -> Optional[TransportableDataFactory]:
         return self.__ted_factory
+
+    # Override
+    def create_transportable_data(self, data: bytes, encoding: Optional[str],
+                                  mime_type: Optional[str],
+                                  parameters: Optional[StrMap]) -> TransportableData:
+        factory = self.get_transportable_data_factory()
+        assert factory is not None, 'TED factory not ready'
+        return factory.create_transportable_data(data=data, encoding=encoding,
+                                                 mime_type=mime_type, parameters=parameters)
 
     # Override
     def parse_transportable_data(self, ted: Any) -> Optional[TransportableData]:

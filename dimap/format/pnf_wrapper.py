@@ -156,8 +156,11 @@ class PortableNetworkFileWrapper(TransportableFileWrapper):
     # Override
     @property
     def url(self) -> Optional[URI]:
-        # TODO: convert str to URI?
-        return self.get_str(key='URL')
+        # URI is just str in Python, so no Uri.parse() needed
+        locator = self.get_str(key='URL')
+        if locator is None or len(locator) == 0:
+            return None
+        return locator
 
     # Override
     @url.setter
@@ -165,7 +168,7 @@ class PortableNetworkFileWrapper(TransportableFileWrapper):
         if remote is None:
             self.__dictionary.pop('URL', None)
         else:
-            # TODO: convert URI to str?
+            # URI is str, store it directly
             self.__dictionary['URL'] = remote
 
     #

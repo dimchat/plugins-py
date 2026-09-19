@@ -23,7 +23,7 @@
 # SOFTWARE.
 # ==============================================================================
 
-from mkm.types import final
+from dimp import final
 
 
 @final
