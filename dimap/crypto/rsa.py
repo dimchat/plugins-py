@@ -32,13 +32,13 @@ from Crypto.Signature import PKCS1_v1_5 as Signature_PKCS1_v1_5
 
 from dimp import final
 from dimp import StrMap, MutableStrMap
-from dimp import AsymmetricAlgorithms
 from dimp import EncryptKey, DecryptKey
 from dimp import PublicKey, PublicKeyFactory
 from dimp import PrivateKey, PrivateKeyFactory
 from dimp import TransportableData
 from dimp import PlainData
 
+from .algorithms import AsymmetricAlgorithms
 from .keys import BaseKey, BasePublicKey, BasePrivateKey
 
 

@@ -2,7 +2,7 @@
 # ==============================================================================
 # MIT License
 #
-# Copyright (c) 2023 Albert Moky
+# Copyright (c) 2026 Albert Moky
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,49 +23,48 @@
 # SOFTWARE.
 # ==============================================================================
 
-from .coder import Base64Coder, Base58Coder, HexCoder
-from .coder import JSONCoder, UTF8Coder
-# from .coder import CoderMixIn
+from typing import Optional
 
-from .duri import StringPairing, MutableStringPairing
-from .duri import Header, DataURI
+from mkm.format import Base64
 
-from .base64_data import Base64Data
+from dimp import BaseData
 
-from .embed import EmbedData
-
-from .pnf import PortableNetworkFile
-from .pnf_wrapper import PortableNetworkFileWrapper
-
-from .factories import BaseNetworkDataFactory, BaseNetworkFileFactory
-# from .factories import TransportableMixIn
+from ..crypto.algorithms import EncodeAlgorithms
 
 
-__all__ = [
+class Base64Data(BaseData):
+    """ Base-64 encoding """
+
+    @property
+    def encoding(self) -> str:
+        return EncodeAlgorithms.BASE_64
+
+    # Override
+    def to_bytes(self) -> Optional[bytes]:
+        data = self._binary
+        if data is None:
+            base64 = self._string
+            assert base64 is not None, f'Base64Data error: {self}'
+            data = Base64.decode(string=base64)
+            self._binary = data
+        return data
+
+    # Override
+    def to_str(self) -> str:
+        base64 = self._string
+        if base64 is None or len(base64) == 0:
+            data = self._binary
+            assert data is not None, f'Base64Data error: {self}'
+            base64 = Base64.encode(data=data)
+            self._string = base64
+        return base64
 
     #
-    #   Data Format
+    #   Factory
     #
 
-    'Base64Coder', 'Base58Coder', 'HexCoder',
-    'JSONCoder', 'UTF8Coder',
-    # 'CoderMixIn',
-
-    'StringPairing', 'MutableStringPairing',
-    'Header', 'DataURI',
-
-    'Base64Data',
-
-    'EmbedData',
-
-    #
-    #   PNF
-    #
-
-    'PortableNetworkFile',
-    'PortableNetworkFileWrapper',
-
-    'BaseNetworkDataFactory', 'BaseNetworkFileFactory',
-    # 'TransportableMixIn',
-
-]
+    @classmethod
+    def create(cls, string: str = None, binary: bytes = None):
+        assert not (string is None and binary is None), \
+            'encoded string and binary data should not be empty at the same time'
+        return Base64Data(string=string, binary=binary)

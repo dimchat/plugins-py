@@ -30,12 +30,12 @@ import ecdsa
 
 from dimp import final
 from dimp import StrMap
-from dimp import AsymmetricAlgorithms
 from dimp import PublicKey, PublicKeyFactory
 from dimp import PrivateKey, PrivateKeyFactory
 from dimp import TransportableData
 from dimp import PlainData
 
+from .algorithms import AsymmetricAlgorithms
 from .keys import BasePublicKey, BasePrivateKey
 
 

@@ -31,7 +31,7 @@ from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import PublicKey, PublicKeyFactory
 from dimp import PrivateKey, PrivateKeyFactory
 
-from dimp import GeneralCryptoHelper
+from dimp import CryptoKeyHandler
 from dimp import SymmetricKeyHelper
 from dimp import PrivateKeyHelper, PublicKeyHelper
 
@@ -52,7 +52,7 @@ except TypeError:
     PublicKeyFactoryMap = typing.MutableMapping[str, PublicKeyFactory]
 
 
-class CryptographyKeyGeneralFactory(GeneralCryptoHelper, SymmetricKeyHelper,
+class CryptographyKeyGeneralFactory(CryptoKeyHandler, SymmetricKeyHelper,
                                     PrivateKeyHelper, PublicKeyHelper):
 
     def __init__(self):

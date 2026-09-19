@@ -2,7 +2,7 @@
 # ==============================================================================
 # MIT License
 #
-# Copyright (c) 2023 Albert Moky
+# Copyright (c) 2025 Albert Moky
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,49 +23,35 @@
 # SOFTWARE.
 # ==============================================================================
 
-from .coder import Base64Coder, Base58Coder, HexCoder
-from .coder import JSONCoder, UTF8Coder
-# from .coder import CoderMixIn
-
-from .duri import StringPairing, MutableStringPairing
-from .duri import Header, DataURI
-
-from .base64_data import Base64Data
-
-from .embed import EmbedData
-
-from .pnf import PortableNetworkFile
-from .pnf_wrapper import PortableNetworkFileWrapper
-
-from .factories import BaseNetworkDataFactory, BaseNetworkFileFactory
-# from .factories import TransportableMixIn
+from mkm.types import final
 
 
-__all__ = [
+@final
+class AsymmetricAlgorithms:
+    """ Algorithms for Asymmetric Key """
 
-    #
-    #   Data Format
-    #
+    RSA = 'RSA'  # -- "RSA/ECB/PKCS1Padding", "SHA256withRSA"
+    ECC = 'ECC'
 
-    'Base64Coder', 'Base58Coder', 'HexCoder',
-    'JSONCoder', 'UTF8Coder',
-    # 'CoderMixIn',
 
-    'StringPairing', 'MutableStringPairing',
-    'Header', 'DataURI',
+@final
+class SymmetricAlgorithms:
+    """ Algorithms for Symmetric Key """
 
-    'Base64Data',
+    AES = 'AES'  # -- "AES/CBC/PKCS7Padding"
+    DES = 'DES'
 
-    'EmbedData',
+    # Symmetric key algorithm for broadcast message,
+    # which will do nothing when en/decoding message data
+    PLAIN = 'PLAIN'
 
-    #
-    #   PNF
-    #
 
-    'PortableNetworkFile',
-    'PortableNetworkFileWrapper',
+@final
+class EncodeAlgorithms:
+    """ Algorithms for Encoding Data """
 
-    'BaseNetworkDataFactory', 'BaseNetworkFileFactory',
-    # 'TransportableMixIn',
+    DEFAULT = 'base64'
 
-]
+    BASE_64 = 'base64'
+    BASE_58 = 'base58'
+    HEX = 'hex'

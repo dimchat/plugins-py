@@ -61,8 +61,8 @@ __all__ = [
     'MetaExtension', 'DocumentExtension',
     'AccountExtensions', 'shared_account_extensions',
 
-    'GeneralCryptoHelper', 'GeneralCryptoExtension',
-    'GeneralAccountHelper', 'GeneralAccountExtension',
+    'GeneralCryptoExtension',
+    'AccountHandler', 'GeneralAccountExtension',
 
     'ContentHelper', 'EnvelopeHelper',
     'InstantMessageHelper', 'SecureMessageHelper', 'ReliableMessageHelper',
@@ -71,10 +71,10 @@ __all__ = [
     'InstantMessageExtension', 'SecureMessageExtension', 'ReliableMessageExtension',
     'MessageExtensions', 'shared_message_extensions',
 
-    'GeneralMessageHelper', 'GeneralMessageExtension',
+    'MessageHandler', 'MessageHandlerExtension',
 
-    'CommandHelper', 'GeneralCommandHelper',
-    'CommandExtension', 'CmdExtension',
+    'CommandHelper', 'CommandHandler',
+    'CommandExtension', 'GeneralCommandExtension',
 
     ################################
     #

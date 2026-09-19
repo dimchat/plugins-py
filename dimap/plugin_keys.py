@@ -23,9 +23,9 @@
 # SOFTWARE.
 # ==============================================================================
 
-from dimp import SymmetricAlgorithms, AsymmetricAlgorithms
 from dimp import SymmetricKey, PublicKey, PrivateKey
 
+from .crypto import SymmetricAlgorithms, AsymmetricAlgorithms
 from .crypto import AESKey, AESKeyFactory, PlainKeyFactory
 from .crypto import ECCPublicKeyFactory, ECCPrivateKeyFactory
 from .crypto import RSAPublicKeyFactory, RSAPrivateKeyFactory

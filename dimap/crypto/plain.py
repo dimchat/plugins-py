@@ -27,11 +27,11 @@ from typing import Optional
 
 from dimp import final
 from dimp import StrMap, MutableStrMap
-from dimp import SymmetricAlgorithms
 from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import TransportableData
 from dimp import PlainData
 
+from .algorithms import SymmetricAlgorithms
 from .keys import BaseKey, BaseSymmetricKey
 
 

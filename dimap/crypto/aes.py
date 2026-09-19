@@ -30,11 +30,12 @@ from Crypto.Cipher import AES
 
 from dimp import final
 from dimp import StrMap, MutableStrMap
-from dimp import SymmetricAlgorithms
 from dimp import SymmetricKey, SymmetricKeyFactory
 from dimp import TransportableData
-from dimp import Base64Data
 
+from ..format import Base64Data
+
+from .algorithms import SymmetricAlgorithms
 from .keys import BaseSymmetricKey
 
 
@@ -92,7 +93,7 @@ class AESKey(BaseSymmetricKey):
     @property
     def block_size(self) -> int:
         # TODO: get from iv data
-        count = self.get(key='blockSize')
+        count = self.get_int(key='blockSize')
         if count is None:
             return AES.block_size  # 16
         else:

@@ -29,7 +29,7 @@ from dimp import StrMap
 from dimp import Mapper, Dictionary
 from dimp import CryptographyKey, EncryptKey, DecryptKey, SignKey, VerifyKey
 from dimp import SymmetricKey, AsymmetricKey, PublicKey, PrivateKey
-from dimp import GeneralCryptoHelper
+from dimp import CryptoKeyHandler
 from dimp import GeneralCryptoExtension, shared_crypto_extensions
 
 
@@ -63,12 +63,12 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
     @classmethod
     def match_encrypt_key(cls, encrypt_key: EncryptKey, decrypt_key: DecryptKey) -> bool:
         """ match encrypt key """
-        return GeneralCryptoHelper.match_symmetric_keys(encrypt_key=encrypt_key, decrypt_key=decrypt_key)
+        return CryptoKeyHandler.match_symmetric_keys(encrypt_key=encrypt_key, decrypt_key=decrypt_key)
 
     @classmethod
     def match_sign_key(cls, sign_key: SignKey, verify_key: VerifyKey) -> bool:
         """ match sign key """
-        return GeneralCryptoHelper.match_asymmetric_keys(sign_key=sign_key, verify_key=verify_key)
+        return CryptoKeyHandler.match_asymmetric_keys(sign_key=sign_key, verify_key=verify_key)
 
     @classmethod
     def symmetric_keys_equal(cls, a: SymmetricKey, b: SymmetricKey) -> bool:
@@ -93,9 +93,9 @@ def crypto_extensions() -> GeneralCryptoExtension:
     return shared_crypto_extensions
 
 
-def crypto_helper() -> GeneralCryptoHelper:
+def crypto_helper() -> CryptoKeyHandler:
     ext = crypto_extensions()
-    return ext.helper
+    return ext.handler
 
 
 # noinspection PyAbstractClass
