@@ -23,11 +23,18 @@
 # SOFTWARE.
 # ==============================================================================
 
+"""
+    Data Format
+    ~~~~~~~~~~~
+
+    Base64, EmbedData, PNF
+"""
+
 from .coder import Base64Coder, Base58Coder, HexCoder
 from .coder import JSONCoder, UTF8Coder
 # from .coder import CoderMixIn
 
-from .duri import StringPairing, MutableStringPairing
+# from .duri import StringPairing, MutableStringPairing
 from .duri import Header, DataURI
 
 from .base64_data import Base64Data
@@ -51,7 +58,7 @@ __all__ = [
     'JSONCoder', 'UTF8Coder',
     # 'CoderMixIn',
 
-    'StringPairing', 'MutableStringPairing',
+    # 'StringPairing', 'MutableStringPairing',
     'Header', 'DataURI',
 
     'Base64Data',

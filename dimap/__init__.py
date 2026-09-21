@@ -30,13 +30,21 @@
     Decentralized Instant Messaging Algorithm Plugins
 """
 
-from dimp.ext import *
-
 from .crypto import *
 from .format import *
 
 from .ext import *
 
+from .crypto.digest import DigestMixIn
+from .format.coder import CoderMixIn
+from .format.factories import TransportableMixIn
+from .format.duri import StringPairing, MutableStringPairing
+from .ext.crypto import SymmetricKeyFactoryMap
+from .ext.crypto import PrivateKeyFactoryMap
+from .ext.crypto import PublicKeyFactoryMap
+
+from .plugin_core import CoreMixIn
+from .plugin_keys import CryptoMixIn
 from .plugin_loader import PluginLoader
 
 
@@ -45,65 +53,6 @@ name = "DIM-AP"
 __author__ = 'Albert Moky'
 
 __all__ = [
-
-    #
-    #   Format
-    #
-
-    'TransportableDataHelper',
-    'FormatExtensions', 'shared_format_extensions',
-
-    #
-    #   Crypto
-    #
-
-    'SymmetricKeyHelper', 'PublicKeyHelper', 'PrivateKeyHelper',
-
-    'SymmetricKeyExtension', 'PublicKeyExtension', 'PrivateKeyExtension',
-    'CryptoExtensions', 'shared_crypto_extensions',
-
-    'EncryptedBundleHandler', 'DefaultBundleHandler',
-    'BundleExtension',
-
-    #
-    #   Ming-Ke-Ming
-    #
-
-    'AddressHelper', 'IDHelper',
-    'MetaHelper', 'DocumentHelper',
-
-    'AddressExtension', 'IDExtension',
-    'MetaExtension', 'DocumentExtension',
-    'AccountExtensions', 'shared_account_extensions',
-
-    'CryptoKeyHandler',
-    'GeneralCryptoExtension',
-    'AccountHandler', 'GeneralAccountExtension',
-
-    #
-    #   Dao-Ke-Dao
-    #
-
-    'ContentHelper', 'EnvelopeHelper',
-    'InstantMessageHelper', 'SecureMessageHelper', 'ReliableMessageHelper',
-
-    'ContentExtension',
-    'InstantMessageExtension', 'SecureMessageExtension', 'ReliableMessageExtension',
-    'MessageExtensions', 'shared_message_extensions',
-
-    'MessageHandler', 'MessageHandlerExtension',
-
-    # ----------------------------------------------------------------
-
-    'TransportableFileHelper',
-    'CommandHelper', 'CommandHandler',
-    'CommandExtension', 'GeneralCommandExtension',
-
-    ################################
-    #
-    #   Crypto
-    #
-    ################################
 
     'AsymmetricAlgorithms', 'SymmetricAlgorithms',
     'EncodeAlgorithms',
@@ -126,21 +75,19 @@ __all__ = [
     'ECCPrivateKey', 'ECCPrivateKeyFactory',
 
     #
-    #   Message Digest
+    #   Message Digester
     #
 
     'SHA256Digester', 'KECCAK256Digester', 'RIPEMD160Digester',
-    # 'DigestMixIn',
+    'DigestMixIn',
 
-    ################################
     #
-    #   Format
+    #   Data Format
     #
-    ################################
 
     'Base64Coder', 'Base58Coder', 'HexCoder',
     'JSONCoder', 'UTF8Coder',
-    # 'CoderMixIn',
+    'CoderMixIn',
 
     'StringPairing', 'MutableStringPairing',
     'Header', 'DataURI',
@@ -149,32 +96,30 @@ __all__ = [
 
     'EmbedData',
 
-    #
-    #   PNF
-    #
-
     'PortableNetworkFile',
     'PortableNetworkFileWrapper',
 
     'BaseNetworkDataFactory', 'BaseNetworkFileFactory',
-    # 'TransportableMixIn',
+    'TransportableMixIn',
 
-    ################################
     #
     #   Core Extensions
     #
-    ################################
+
+    'SymmetricKeyFactoryMap',
+    'PrivateKeyFactoryMap',
+    'PublicKeyFactoryMap',
 
     'GeneralCryptoHelper',
+
     'GeneralFormatHelper',
 
     #
-    #   Loaders
+    #   Plugin Loader
     #
 
-    # 'CoreMixIn',
-    # 'CryptoMixIn',
-
+    'CoreMixIn',
+    'CryptoMixIn',
     'PluginLoader',
 
 ]

@@ -1,4 +1,4 @@
-# DIM Plugins (Python)
+# DIM Algorithm Plugins (Python)
 
 [![License](https://img.shields.io/github/license/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/blob/main/LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/dimchat/plugins-py/pulls)
@@ -13,6 +13,16 @@
 [![Stars](https://img.shields.io/github/stars/dimchat/plugins-py)](https://github.com/dimchat/plugins-py/stargazers)
 [![Followers](https://img.shields.io/github/followers/dimchat)](https://github.com/orgs/dimchat/followers)
 
+## Dependencies
+
+* Latest Versions
+
+| Name | Version | Description |
+|------|---------|-------------|
+| [Ming Ke Ming (名可名)](https://github.com/dimchat/mkm-py) | [![Version](https://img.shields.io/pypi/v/mkm)](https://pypi.org/project/mkm) | Decentralized User Identity Authentication |
+| [Dao Ke Dao (道可道)](https://github.com/dimchat/dkd-py) | [![Version](https://img.shields.io/pypi/v/dkd)](https://pypi.org/project/dkd) | Universal Message Module |
+| [DIMP (去中心化通讯协议)](https://github.com/dimchat/core-py) | [![Version](https://img.shields.io/pypi/v/dimp)](https://pypi.org/project/dimp) | Decentralized Instant Messaging Protocol |
+
 ## Plugins
 
 1. Data Coding
@@ -24,8 +34,6 @@
    * PNF _(Portable Network File)_
    * TED _(Transportable Encoded Data)_
 2. Digest Digest
-   * MD-5
-   * SHA-1
    * SHA-256
    * Keccak-256
    * RipeMD-160
@@ -33,235 +41,44 @@
    * AES-256 _(AES/CBC/PKCS7Padding)_
    * RSA-1024 _(RSA/ECB/PKCS1Padding)_, _(SHA256withRSA)_
    * ECC _(Secp256k1)_
-4. Address
-   * BTC
-   * ETH
-5. Meta
-   * MKM _(Default)_
-   * BTC
-   * ETH
-6. Document
-   * Visa _(User)_
-   * Profile
-   * Bulletin _(Group)_
-
-## Extends
-
-### Address
-
-```python
-from typing import Optional
-
-from dimp import *
-from dimplugins import *
-
-
-class CompatibleAddressFactory(BaseAddressFactory):
-
-    # Override
-    def _parse(self, address: str) -> Optional[Address]:
-        size = len(address)
-        if size == 0:
-            assert False, 'address should not be empty'
-        elif size == 8:
-            # "anywhere"
-            if address.lower() == 'anywhere':
-                return ANYWHERE
-        elif size == 10:
-            # "everywhere"
-            if address.lower() == 'everywhere':
-                return EVERYWHERE
-        #
-        #  checking normal address
-        #
-        if 26 <= size <= 35:
-            res = BTCAddress.from_str(address=address)
-        elif size == 42:
-            res = ETHAddress.from_str(address=address)
-        else:
-            # assert False, 'invalid address: %s' % address
-            res = None
-        #
-        #  TODO: other types of address
-        #
-        if res is None and 4 <= size <= 64:
-            res = UnknownAddress(address=address)
-        assert res is not None, 'invalid address: %s' % address
-        return res
-
-
-class UnknownAddress(ConstantString, Address):
-    """
-        Unsupported Address
-        ~~~~~~~~~~~~~~~~~~~
-    """
-
-    def __init__(self, address: str):
-        super().__init__(string=address)
-
-    @property  # Override
-    def network(self) -> int:
-        return 0  # EntityType.USER.value
-```
-
-### Meta
-
-```python
-from collections.abc import Mapping
-from typing import Optional
-
-from dimp import Meta
-from dimplugins import *
-
-
-class CompatibleMetaFactory(BaseMetaFactory):
-
-    # Override
-    def parse_meta(self, meta: Mapping) -> Optional[Meta]:
-        helper = account_helper()
-        version = helper.get_meta_type(meta=meta)
-        if version in ['1', 'mkm', 'MKM']:
-            # MKM
-            out = DefaultMeta(meta=meta)
-        elif version in ['2', 'btc', 'BTC']:
-            # BTC
-            out = BTCMeta(meta=meta)
-        elif version in ['4', 'eth', 'ETH']:
-            # ETH
-            out = ETHMeta(meta=meta)
-        else:
-            raise TypeError('unknown meta type: %d' % version)
-        if out.is_valid:
-            return out
-
-
-def account_extensions() -> GeneralAccountExtension:
-    return shared_account_extensions
-
-
-def account_helper() -> GeneralAccountHelper:
-    ext = account_extensions()
-    return ext.helper
-```
-
-### ExtensionLoader
-
-```python
-from dimp import MetaType, ContentType
-from dimplugins import ExtensionLoader
-
-from ..protocol import HandshakeCommand, BaseHandshakeCommand
-from ..protocol import AppCustomizedContent
-
-
-class CommonExtensionLoader(ExtensionLoader):
-
-    # Override
-    def register_address_factory(self):
-        Address.set_factory(factory=CompatibleAddressFactory())
-
-    # Override
-    def register_meta_factories(self):
-        mkm = CompatibleMetaFactory(version=MetaType.MKM)
-        btc = CompatibleMetaFactory(version=MetaType.BTC)
-        eth = CompatibleMetaFactory(version=MetaType.ETH)
-        Meta.set_factory(version='1', factory=mkm)
-        Meta.set_factory(version='2', factory=btc)
-        Meta.set_factory(version='4', factory=eth)
-        Meta.set_factory(version='mkm', factory=mkm)
-        Meta.set_factory(version='btc', factory=btc)
-        Meta.set_factory(version='eth', factory=eth)
-        Meta.set_factory(version='MKM', factory=mkm)
-        Meta.set_factory(version='BTC', factory=btc)
-        Meta.set_factory(version='ETH', factory=eth)
-
-    # Override
-    def register_content_factories(self):
-        super().register_content_factories()
-        self.register_customized_factories()
-
-    # protected
-    def register_customized_factories(self):
-        # Application Customized
-        self._set_content_factory(msg_type=ContentType.APPLICATION, content_class=AppCustomizedContent)
-        self._set_content_factory(msg_type=ContentType.CUSTOMIZED, content_class=AppCustomizedContent)
-
-    # Override
-    def register_command_factories(self):
-        super().register_command_factories()
-        # Handshake
-        self._set_command_factory(cmd=HandshakeCommand.HANDSHAKE, command_class=BaseHandshakeCommand)
-```
 
 ### Plugin Loader
 
 ```python
-from dimplugins import PluginLoader
+from typing import Optional
 
-from .mdx import MD5, MD5Digester
-from .mdx import SHA1, SHA1Digester
+from dimp import Base64
+from dimap import PluginLoader
+from dimap import Base64Coder
 
 
 class CommonPluginLoader(PluginLoader):
 
     # Override
-    def _load_message_digesters(self):
-        super()._load_message_digesters()
-        self.register_md5_digester()
-        self.register_sha1_digester()
+    def register_base64_coder(self):
+        # Base64 coding
+        Base64.coder = _PatchBase64Coder()
 
-    # protected
-    def register_md5_digester(self):
-        MD5.digester = MD5Digester()
 
-    # protected
-    def register_sha1_digester(self):
-        SHA1.digester = SHA1Digester()
+# Base-64
+class _PatchBase64Coder(Base64Coder):
+
+    # Override
+    def decode(self, string: str) -> Optional[bytes]:
+        string = self.trim_base64_string(b64=string)
+        return super().decode(string=string)
+
+    @staticmethod
+    def trim_base64_string(b64: str) -> str:
+        if '\n' in b64:
+            b64 = b64.replace('\n', '')
+            b64 = b64.replace('\r', '')
+            b64 = b64.replace('\t', '')
+            b64 = b64.replace(' ', '')
+        return b64.strip()
 ```
 
-## Usage
-
-You must load all plugins before your business run:
-
-```python
-from dimplugins import ExtensionLoader
-from dimplugins import PluginLoader
-
-from .compat_loader import CommonExtensionLoader
-from .compat_loader import CommonPluginLoader
-
-
-class LibraryLoader:
-
-    def __init__(self, extensions: ExtensionLoader = None, plugins: PluginLoader = None):
-        super().__init__()
-        self.__extensions = CommonExtensionLoader() if extensions is None else extensions
-        self.__plugins = CommonPluginLoader() if plugins is None else plugins
-        self.__loaded = False
-
-    def run(self):
-        if self.__loaded:
-            # no need to load it again
-            return
-        else:
-            # mark it to loaded
-            self.__loaded = True
-        # try to load all plugins
-        self.load()
-        
-    # protected
-    def load(self):
-        self.__extensions.load()
-        self.__plugins.load()
-
-
-if __name__ == '__main__':
-  loader = LibraryLoader()
-  loader.run()
-  # do your jobs after all extensions & plugins loaded
-```
-
-You must ensure that every ```Address``` you extend has a ```Meta``` type that can correspond to it one by one.
+This library is primarily designed to implement various algorithms in a plug-in manner, allowing you to further develop additional algorithms tailored to your specific applications.
 
 ----
 

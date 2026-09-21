@@ -23,17 +23,29 @@
 # SOFTWARE.
 # ==============================================================================
 
+"""
+    DIM-AP
+    ~~~~~~
+
+    Decentralized Instant Messaging Algorithm Plugins
+"""
+
+# from .crypto import SymmetricKeyFactoryMap
+# from .crypto import PrivateKeyFactoryMap
+# from .crypto import PublicKeyFactoryMap
 from .crypto import GeneralCryptoHelper
+
 from .format import GeneralFormatHelper
 
 
 __all__ = [
 
-    #
-    #   Core Extensions
-    #
+    # 'SymmetricKeyFactoryMap',
+    # 'PrivateKeyFactoryMap',
+    # 'PublicKeyFactoryMap',
 
     'GeneralCryptoHelper',
+
     'GeneralFormatHelper',
 
 ]

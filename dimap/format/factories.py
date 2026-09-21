@@ -145,21 +145,29 @@ class _PNFWrapperFactory(TransportableFileWrapperFactory):
 
 # noinspection PyMethodMayBeStatic
 class TransportableMixIn:
-    """ Transportable Plugins """
+    """
+    Format Plugins
+
+    Registers the TED factory, PNF factory and PNF wrapper
+    factory into the corresponding factory holders.
+    """
 
     # protected
     def register_ted_factory(self):
+        """ Set TED factory. """
         # TED
         factory = BaseNetworkDataFactory()
         TransportableData.set_factory(factory=factory)
 
     # protected
     def register_pnf_factory(self):
+        """ Set PNF factory. """
         # PNF
         factory = BaseNetworkFileFactory()
-        PortableNetworkFile.set_factory(factory=factory)
+        TransportableFile.set_factory(factory=factory)
 
     # protected
     def register_pnf_wrapper_factory(self):
+        """ Set PNF Wrapper factory. """
         # PNF Wrapper
         shared_format_extensions.pnf_wrapper_factory = _PNFWrapperFactory()
