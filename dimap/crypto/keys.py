@@ -27,10 +27,11 @@ from abc import ABC
 
 from dimp import StrMap
 from dimp import Mapper, Dictionary
-from dimp import CryptographyKey, EncryptKey, DecryptKey, SignKey, VerifyKey
-from dimp import SymmetricKey, AsymmetricKey, PublicKey, PrivateKey
+from dimp import CryptographyKey, SymmetricKey, AsymmetricKey
+from dimp import EncryptKey, DecryptKey, SignKey, VerifyKey
+from dimp import PublicKey, PrivateKey
 from dimp import CryptoKeyHandler
-from dimp import GeneralCryptoExtension, shared_crypto_extensions
+from dimp import crypto_handler
 
 
 """
@@ -65,7 +66,7 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
         which parses the key data to figure out the algorithm name
         (e.g. "AES", "ECC", "RSA", ...).
         """
-        helper = crypto_helper()
+        helper = crypto_handler()
         algorithm = helper.get_key_algorithm(key=key)
         return '' if algorithm is None else algorithm
 
@@ -112,15 +113,6 @@ class BaseKey(Dictionary, CryptographyKey, ABC):
             return True
         # compare by signature
         return cls.match_sign_key(sign_key=a, verify_key=b.public_key)
-
-
-def crypto_extensions() -> GeneralCryptoExtension:
-    return shared_crypto_extensions
-
-
-def crypto_helper() -> CryptoKeyHandler:
-    ext = crypto_extensions()
-    return ext.handler
 
 
 """
