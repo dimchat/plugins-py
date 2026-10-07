@@ -23,7 +23,7 @@
 # SOFTWARE.
 # ==============================================================================
 
-import random
+import os
 from typing import Optional
 
 from Crypto.Cipher import AES
@@ -38,9 +38,11 @@ from .keys import BaseSymmetricKey
 
 
 def random_bytes(size: int) -> bytes:
-    # return bytes(numpy.random.bytes(size))
-    bits = random.getrandbits(size * 8)
-    return bits.to_bytes(length=size, byteorder='little', signed=False)
+    """Random bytes for keys and IVs, from the OS cryptographic random generator.
+
+    `random.getrandbits` (Mersenne Twister) is not suitable for key material.
+    """
+    return os.urandom(size)
 
 
 class AESKey(BaseSymmetricKey):
